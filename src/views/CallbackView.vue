@@ -1,19 +1,21 @@
 <script setup lang="ts">
+import Cookies from "js-cookie";
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import settings from "@/settings.json";
-import type { IGuild, IUser } from '@/models';
+import type { Guild, User } from '@/models';
 
 const route = useRoute();
 
 const code: String = String(route.query.code);
-const user = ref<IUser | null>(null);
-const guilds = ref<Array<IGuild>>([]);
+const user = ref<User | null>(null);
+const guilds = ref<Array<Guild>>([]);
 
 onMounted(() => {
     axios.get(`${settings.BACKEND_URL}/auth/discord/callback`, { params: { code: code } })
         .then((response) => {
+            Cookies.set("session_id", response.data.session_id, { expires: 1, secure: true });
             user.value = response.data.user;
             guilds.value = response.data.guilds;
         });
