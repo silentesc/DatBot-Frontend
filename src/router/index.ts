@@ -12,7 +12,7 @@ const router = createRouter({
     },
     {
       path: '/auth/discord',
-      name: 'callback',
+      name: 'CallbackView',
       component: CallbackView,
     }
   ],

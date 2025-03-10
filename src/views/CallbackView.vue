@@ -2,34 +2,28 @@
 import Cookies from "js-cookie";
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import settings from "@/settings.json";
-import type { Guild, User } from '@/models';
+
+const loading = ref(true);
 
 const route = useRoute();
+const router = useRouter();
 
 const code: String = String(route.query.code);
-const user = ref<User | null>(null);
-const guilds = ref<Array<Guild>>([]);
 
 onMounted(() => {
     axios.get(`${settings.BACKEND_URL}/auth/discord/callback`, { params: { code: code } })
         .then((response) => {
             Cookies.set(settings.SESSION_ID_COOKIE, response.data.session_id, { expires: 7, secure: true });
-            user.value = response.data.user;
-            guilds.value = response.data.guilds;
+            router.push({ name: 'HomeView' });
         });
+
+    loading.value = false;
 });
 </script>
 
 <template>
     <h1>Callback</h1>
-
-    <div v-if="user">
-        <h2>{{ user.username }}</h2>
-    </div>
-
-    <div v-for="guild in guilds">
-        {{ guild.name }}
-    </div>
+    <h2 v-if="loading">Loading...</h2>
 </template>
