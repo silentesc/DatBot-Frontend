@@ -15,7 +15,7 @@ const login_with_discord = async () => {
 }
 
 onMounted(async () => {
-  const sessionId: String | undefined = Cookies.get("session_id")
+  const sessionId: String | undefined = Cookies.get(settings.SESSION_ID_COOKIE)
   if (!sessionId) {
     return;
   }
@@ -25,7 +25,7 @@ onMounted(async () => {
       session.value = response.data;
     }).catch((error) => {
       if (error.status === 404) {
-        Cookies.remove("session_id");
+        Cookies.remove(settings.SESSION_ID_COOKIE);
       }
     });
 });
