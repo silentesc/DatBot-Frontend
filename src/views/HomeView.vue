@@ -23,7 +23,11 @@ onMounted(async () => {
   await axios.get(`${settings.BACKEND_URL}/auth/validate`, { params: { session_id: sessionId } })
     .then((response) => {
       session.value = response.data;
-    })
+    }).catch((error) => {
+      if (error.status === 404) {
+        Cookies.remove("session_id");
+      }
+    });
 });
 </script>
 
