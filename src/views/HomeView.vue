@@ -28,7 +28,7 @@ onMounted(async () => {
     return;
   }
 
-  await axios.get(`${settings.BACKEND_URL}/auth/validate`, { params: { session_id: sessionId } })
+  await axios.get(`${settings.BACKEND_URL}/auth/validate_session`, { params: { session_id: sessionId } })
     .then((response) => {
       session.value = response.data;
     }).catch((error) => {
@@ -48,15 +48,16 @@ onMounted(async () => {
     <div v-else>
       <!-- User Login -->
       <div class="user-login">
-        <img :src="`https://cdn.discordapp.com/avatars/${session.user.id}/${session.user.avatar}.png`"
-          alt="User Avatar" width="50px">
+        <img :src="`https://cdn.discordapp.com/avatars/${session.user.id}/${session.user.avatar}.png`" alt="User Avatar"
+          width="50px">
         <span class="username">{{ session.user.username }}</span>
         <button @click="logout" class="logout-button">Logout</button>
       </div>
       <!-- Guilds -->
       <div class="guilds">
         <div class="guild-card" v-for="guild in session.guilds">
-          <img v-if="guild.icon" :src="`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`" alt="Guild Icon" width="100px">
+          <img v-if="guild.icon" :src="`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`"
+            alt="Guild Icon" width="100px">
           <img v-else src="https://cdn.discordapp.com/embed/avatars/2.png" alt="Guild Icon" width="100px">
           <span class="guild-name">{{ guild.name }}</span>
         </div>
