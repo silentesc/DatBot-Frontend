@@ -15,7 +15,7 @@ const guilds = ref<Array<Guild>>([]);
 onMounted(() => {
     axios.get(`${settings.BACKEND_URL}/auth/discord/callback`, { params: { code: code } })
         .then((response) => {
-            Cookies.set("session_id", response.data.session_id, { expires: 1, secure: true });
+            Cookies.set("session_id", response.data.session_id, { expires: 7, secure: true });
             user.value = response.data.user;
             guilds.value = response.data.guilds;
         });
