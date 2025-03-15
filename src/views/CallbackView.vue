@@ -4,6 +4,7 @@ import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import settings from "@/settings.json";
+import type { Session } from "@/models";
 
 const loading = ref(true);
 
@@ -15,7 +16,8 @@ const code: String = String(route.query.code);
 onMounted(() => {
     axios.get(`${settings.BACKEND_URL}/auth/discord/callback`, { params: { code: code } })
         .then((response) => {
-            Cookies.set(settings.SESSION_ID_COOKIE, response.data.session_id, { expires: 7, secure: true });
+            const session: Session = response.data;
+            Cookies.set(settings.SESSION_ID_COOKIE, session.session_id, { expires: 7, secure: true });
             router.push({ name: 'HomeView' });
         });
 
