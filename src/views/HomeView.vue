@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import type { Session } from "@/models";
+import type { Guild, Session } from "@/models";
 import settings from "@/settings.json";
 import { onMounted, ref } from 'vue';
 
 const loading = ref(true);
 
 const session = ref<Session | null>(null);
+const botJoinedGuildIds = ref<Array<string>>([]);
 
 const login_with_discord = async () => {
   await axios.get(`${settings.BACKEND_URL}/auth/login`)
@@ -37,6 +38,21 @@ onMounted(async () => {
       }
     });
 
+  await axios.get(`${settings.BACKEND_URL}/user/user_guilds`, { params: { session_id: sessionId } })
+    .then((response) => {
+      for (const entry of response.data) {
+        const guild: Guild = entry["guild"];
+        const botJoined = entry["bot_joined"];
+        if (botJoined) {
+          botJoinedGuildIds.value.push(guild.id);
+        }
+      }
+    }).catch((error) => {
+      if (error.status === 404) {
+        Cookies.remove(settings.SESSION_ID_COOKIE);
+      }
+    });
+
   loading.value = false;
 });
 </script>
@@ -56,9 +72,10 @@ onMounted(async () => {
       <!-- Guilds -->
       <div class="guilds">
         <div class="guild-card" v-for="guild in session.guilds">
-          <img v-if="guild.icon" :src="`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`"
-            alt="Guild Icon" width="100px">
-          <img v-else src="https://cdn.discordapp.com/embed/avatars/2.png" alt="Guild Icon" width="100px">
+          <img
+            :src="(guild.icon) ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
+            alt="Guild Icon"
+            :class="{ 'guild-icon-bot-joined': botJoinedGuildIds.includes(guild.id), 'guild-icon-bot-not-joined': !botJoinedGuildIds.includes(guild.id) }">
           <span class="guild-name">{{ guild.name }}</span>
         </div>
       </div>
@@ -91,11 +108,6 @@ onMounted(async () => {
   padding: 10px 20px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-img {
-  border-radius: 50%;
-  border: 2px solid #000;
 }
 
 .username {
@@ -141,6 +153,19 @@ img {
 .guild-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.guild-icon-bot-joined {
+  width: 100px;
+  border-radius: 50%;
+  border: 2px solid #37ff77;
+}
+
+.guild-icon-bot-not-joined {
+  width: 100px;
+  border-radius: 50%;
+  border: 2px solid red;
+  filter: grayscale(100%);
 }
 
 .guild-name {
