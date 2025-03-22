@@ -4,23 +4,12 @@ import Cookies from 'js-cookie';
 import type { Guild, Session } from "@/models";
 import settings from "@/settings.json";
 import { onMounted, ref } from 'vue';
+import router from '@/router';
 
 const loading = ref(true);
 
 const session = ref<Session | null>(null);
 const botJoinedGuildIds = ref<Array<string>>([]);
-
-const login_with_discord = async () => {
-  await axios.get(`${settings.BACKEND_URL}/auth/login`)
-    .then((response) => {
-      window.location.href = response.data;
-    });
-}
-
-const logout = () => {
-  Cookies.remove(settings.SESSION_ID_COOKIE);
-  window.location.reload();
-}
 
 onMounted(async () => {
   const sessionId: String | undefined = Cookies.get(settings.SESSION_ID_COOKIE)
@@ -55,81 +44,36 @@ onMounted(async () => {
 
   loading.value = false;
 });
+
+const openGuildSettings = async (guildId: string) => {
+  if (botJoinedGuildIds.value.includes(guildId)) {
+    router.push({ name: 'settings', params: { guildId } });
+  } else {
+    await axios.get(`${settings.BACKEND_URL}/auth/invite`)
+      .then((response) => {
+        window.location.href = response.data;
+      });
+  }
+}
 </script>
 
 <template>
   <div v-if="!loading">
-    <!-- Login button -->
-    <button v-if="!session" @click="login_with_discord" class="login-button">Login with Discord</button>
-    <div v-else>
-      <!-- User Login -->
-      <div class="user-login">
-        <img :src="`https://cdn.discordapp.com/avatars/${session.user.id}/${session.user.avatar}.png`" alt="User Avatar"
-          width="50px">
-        <span class="username">{{ session.user.username }}</span>
-        <button @click="logout" class="logout-button">Logout</button>
-      </div>
-      <!-- Guilds -->
-      <div class="guilds">
-        <div class="guild-card" v-for="guild in session.guilds">
+    <div class="guilds">
+      <div class="guild-card" v-for="guild in session.guilds" :key="guild.id" @click="openGuildSettings(guild.id)">
+        <div class="guild-icon-wrapper"
+          :class="{ 'bot-joined': botJoinedGuildIds.includes(guild.id), 'bot-not-joined': !botJoinedGuildIds.includes(guild.id) }">
           <img
-            :src="(guild.icon) ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
-            alt="Guild Icon"
-            :class="{ 'guild-icon-bot-joined': botJoinedGuildIds.includes(guild.id), 'guild-icon-bot-not-joined': !botJoinedGuildIds.includes(guild.id) }">
-          <span class="guild-name">{{ guild.name }}</span>
+            :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
+            alt="Guild Icon" class="guild-icon" :class="{ 'grayscale': !botJoinedGuildIds.includes(guild.id) }">
         </div>
+        <span class="guild-name">{{ guild.name }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <style lang="css" scoped>
-.login-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  color: #fff;
-  background-color: #7289da;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.login-button:hover {
-  background-color: #5b6eae;
-}
-
-.user-login {
-  width: fit-content;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background-color: #fff;
-  padding: 10px 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.username {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-
-.logout-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  color: #fff;
-  background-color: #f04747;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.logout-button:hover {
-  background-color: #d03a3a;
-}
-
 .guilds {
   display: flex;
   flex-wrap: wrap;
@@ -142,29 +86,46 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #fff;
+  background-color: var(--background);
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--secondary);
+  box-shadow: 0 0 10px var(--secondary);
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .guild-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  scale: 1.05;
+  box-shadow: 0 0 20px var(--accent);
 }
 
-.guild-icon-bot-joined {
+.guild-icon-wrapper {
   width: 100px;
+  height: 100px;
   border-radius: 50%;
-  border: 2px solid #37ff77;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 2.5px solid transparent;
 }
 
-.guild-icon-bot-not-joined {
-  width: 100px;
+.bot-joined {
+  border-color: #37ff7677;
+}
+
+.bot-not-joined {
+  border-color: #ff000050;
+}
+
+.guild-icon {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  border: 2px solid red;
+}
+
+.grayscale {
   filter: grayscale(100%);
 }
 
@@ -172,7 +133,7 @@ onMounted(async () => {
   margin-top: 10px;
   font-size: 16px;
   font-weight: bold;
-  color: #333;
+  color: #fff;
   text-align: center;
 }
 </style>

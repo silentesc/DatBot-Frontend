@@ -2,22 +2,21 @@
 import Cookies from "js-cookie";
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import settings from "@/settings.json";
 import type { Session } from "@/models";
+import { getCurrentInstance } from 'vue';
 
 const loading = ref(true);
-
-const route = useRoute();
 const router = useRouter();
-
-const code: String = String(route.query.code);
+const { emit } = getCurrentInstance()!;
 
 onMounted(() => {
-    axios.get(`${settings.BACKEND_URL}/auth/discord/callback`, { params: { code: code } })
+    axios.get(`${settings.BACKEND_URL}/auth/discord/callback`, { params: { code: String(router.currentRoute.value.query.code) } })
         .then((response) => {
             const session: Session = response.data;
             Cookies.set(settings.SESSION_ID_COOKIE, session.session_id, { expires: 7, secure: true });
+            emit('auth-changed');
             router.push({ name: 'HomeView' });
         });
 
