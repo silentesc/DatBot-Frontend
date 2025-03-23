@@ -40,7 +40,7 @@ onMounted(async () => {
         }
       }
     }).catch((error) => {
-      errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.'; // Hier setzen wir die Fehlermeldung
+      errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.';
       if (error.status === 404) {
         Cookies.remove(settings.SESSION_ID_COOKIE);
       }
