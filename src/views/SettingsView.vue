@@ -329,7 +329,7 @@ onMounted(fetchGuildData);
                 Select Emoji
               </button>
               <div v-if="showEmojiPicker">
-                <Picker :data="emojiIndex" set="twitter" title="Emoji auswählen" @select="handleEmojiSelect"
+                <Picker :data="emojiIndex" set="twitter" title="Select Emoji" @select="handleEmojiSelect"
                   showSkinTones="" />
               </div>
               <div>
