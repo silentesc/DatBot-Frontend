@@ -5,6 +5,9 @@ import type { Guild, Session } from "@/models";
 import settings from "@/settings.json";
 import { onMounted, ref } from 'vue';
 import router from '@/router';
+import ErrorMessage from '@/components/ErrorMessage.vue';
+
+const errorMessage = ref("");
 
 const loading = ref(true);
 
@@ -37,9 +40,13 @@ onMounted(async () => {
         }
       }
     }).catch((error) => {
+      errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.'; // Hier setzen wir die Fehlermeldung
       if (error.status === 404) {
         Cookies.remove(settings.SESSION_ID_COOKIE);
       }
+      setTimeout(() => {
+        errorMessage.value = '';
+      }, 3500);
     });
 
   loading.value = false;
@@ -58,18 +65,19 @@ const openGuildSettings = async (guildId: string) => {
 </script>
 
 <template>
-  <div v-if="!loading">
-    <div class="guilds">
-      <div class="guild-card" v-for="guild in session.guilds" :key="guild.id" @click="openGuildSettings(guild.id)">
-        <div class="guild-icon-wrapper"
-          :class="{ 'bot-joined': botJoinedGuildIds.includes(guild.id), 'bot-not-joined': !botJoinedGuildIds.includes(guild.id) }">
-          <img
-            :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
-            alt="Guild Icon" class="guild-icon" :class="{ 'grayscale': !botJoinedGuildIds.includes(guild.id) }">
-        </div>
-        <span class="guild-name">{{ guild.name }}</span>
+  <ErrorMessage :message="errorMessage" />
+  <div v-if="!loading && session"">
+    <div class=" guilds">
+    <div class="guild-card" v-for="guild in session.guilds" :key="guild.id" @click="openGuildSettings(guild.id)">
+      <div class="guild-icon-wrapper"
+        :class="{ 'bot-joined': botJoinedGuildIds.includes(guild.id), 'bot-not-joined': !botJoinedGuildIds.includes(guild.id) }">
+        <img
+          :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
+          alt="Guild Icon" class="guild-icon" :class="{ 'grayscale': !botJoinedGuildIds.includes(guild.id) }">
       </div>
+      <span class="guild-name">{{ guild.name }}</span>
     </div>
+  </div>
   </div>
 </template>
 
