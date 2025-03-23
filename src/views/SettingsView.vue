@@ -2,62 +2,35 @@
 import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import settings from "@/settings.json";
+import settings from '@/settings.json';
 import { useRoute } from 'vue-router';
-import data from "emoji-mart-vue-fast/data/all.json";
-import { Picker, EmojiIndex } from "emoji-mart-vue-fast/src";
+import data from 'emoji-mart-vue-fast/data/all.json';
+import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src';
 import ErrorMessage from '@/components/ErrorMessage.vue';
-
-const errorMessage = ref('');
 
 const route = useRoute();
 const guildId = route.params.guildId as string;
 
+// State variables
 const selectedSection = ref('Reaction Roles');
 const isAddReactionRoleModalOpen = ref(false);
 const messageContent = ref('');
 const selectedEmojis = ref<string[]>([]);
-const selectedChannel = ref<string | null>(null);
-
+const selectedChannelId = ref<string | null>(null);
 const roles = ref<Role[]>([]);
-const isRolesDropdownOpen = ref<{ [emoji: string]: boolean }>({});
-const decimalToHex = (decimal: number): string => {
-  return '#' + decimal.toString(16).padStart(6, '0');
-}
-
-const handleEmojiSelect = (emoji: any) => {
-  selectedEmojis.value.push(emoji.native);
-  showEmojiPicker.value = !showEmojiPicker.value;
-};
-
-const removeEmoji = (emojiToRemove: string) => {
-  selectedEmojis.value = selectedEmojis.value.filter(emoji => emoji !== emojiToRemove);
-  delete isRolesDropdownOpen.value[emojiToRemove];
-  showEmojiPicker.value = !showEmojiPicker.value;
-};
-
-const emojiRoles = ref<{ emoji: string; role: Role | null }[]>([]);
-
-const addRoleToEmoji = (emoji: string, role: Role) => {
-  const emojiRole = emojiRoles.value.find(er => er.emoji === emoji);
-  if (emojiRole) {
-    emojiRole.role = role;
-  } else {
-    emojiRoles.value.push({ emoji, role });
-  }
-  isRolesDropdownOpen.value = { ...isRolesDropdownOpen.value, [emoji]: false };
-  showEmojiPicker.value = !showEmojiPicker.value;
-};
-
 const channels = ref<Category[]>([]);
+const reactionRoleMessages = ref<ReactionRoleMessage[]>([]);
+const isRolesDropdownOpen = ref<{ [emoji: string]: boolean }>({});
 const isChannelDropdownOpen = ref(false);
 const showEmojiPicker = ref(false);
+const errorMessage = ref('');
+const emojiRoles = ref<{ emoji: string; role: Role | null }[]>([]);
 
-const sections = [
-  'Reaction Roles',
-  'Welcome'
-];
+// Constants
+const sections = ['Reaction Roles', 'Welcome'];
+const emojiIndex = new EmojiIndex(data);
 
+// Interfaces
 interface Channel {
   id: string;
   name: string;
@@ -77,48 +50,50 @@ interface Role {
   position: number;
 }
 
-onMounted(async () => {
-  try {
-    const sessionId: string | undefined = Cookies.get(settings.SESSION_ID_COOKIE);
-    if (sessionId) {
-      const response = await axios.get(`${settings.BACKEND_URL}/user/guild_channels`, {
-        params: { session_id: sessionId, guild_id: guildId }
-      });
-      const textChannels = response.data.filter((channel: any) => channel.type === 0);
-      const categories = response.data.filter((channel: any) => channel.type === 4);
-      channels.value = categories
-        .filter((category: any) =>
-          textChannels.some((channel: any) => channel.parentId === category.id)
-        )
-        .map((category: any) => ({
-          ...category,
-          children: textChannels.filter(
-            (channel: any) => channel.parentId === category.id
-          )
-        }));
-    }
-    if (sessionId) {
-      const response = await axios.get(`${settings.BACKEND_URL}/user/guild_roles`, {
-        params: { session_id: sessionId, guild_id: guildId }
-      });
-      roles.value = response.data;
-      roles.value.sort((a, b) => b.position - a.position);
-    }
-  } catch (error) {
-    console.error('Failed to fetch channels:', error);
+interface ReactionRoleMessage {
+  message_id: string;
+  message: string;
+  channel_id: string;
+  emoji_roles: {
+    emoji: string;
+    role_name: string;
+    role_color: number;
+  }[];
+}
+
+// Help function
+const decimalToHex = (decimal: number): string => {
+  return '#' + decimal.toString(16).padStart(6, '0');
+};
+
+// Emoji functions
+
+const handleSelect = (emoji: any) => {
+  handleEmojiSelect(emoji);
+  closePicker();
+};
+const handleEmojiSelect = (emoji: any) => {
+  selectedEmojis.value.push(emoji.native);
+};
+
+const closePicker = () => {
+  showEmojiPicker.value = showEmojiPicker.value;
+}
+
+const removeEmoji = (emojiToRemove: string, event: Event) => {
+  selectedEmojis.value = selectedEmojis.value.filter((emoji) => emoji !== emojiToRemove);
+  showEmojiPicker.value = !showEmojiPicker.value;
+};
+
+// Role functions
+const addRoleToEmoji = (emoji: string, role: Role) => {
+  const emojiRole = emojiRoles.value.find((er) => er.emoji === emoji);
+  if (emojiRole) {
+    emojiRole.role = role;
+  } else {
+    emojiRoles.value.push({ emoji, role });
   }
-});
-
-const toggleChannelDropdown = () => {
-  isChannelDropdownOpen.value = !isChannelDropdownOpen.value;
-};
-
-const selectChannelItem = (channelId: string | null) => {
-  selectedChannel.value = channelId;
-  isChannelDropdownOpen.value = false;
-};
-
-const toggleEmojiPicker = () => {
+  isRolesDropdownOpen.value = { ...isRolesDropdownOpen.value, [emoji]: false };
   showEmojiPicker.value = !showEmojiPicker.value;
 };
 
@@ -128,68 +103,141 @@ const toggleRolesDropdown = (emoji: string, event: Event) => {
   }
   isRolesDropdownOpen.value = {
     ...isRolesDropdownOpen.value,
-    [emoji]: !isRolesDropdownOpen.value[emoji]
+    [emoji]: !isRolesDropdownOpen.value[emoji],
   };
 };
 
-let emojiIndex = new EmojiIndex(data);
+// Channel functions
+const toggleChannelDropdown = () => {
+  isChannelDropdownOpen.value = !isChannelDropdownOpen.value;
+};
+
+const selectChannelItem = (channelId: string | null) => {
+  selectedChannelId.value = channelId;
+  isChannelDropdownOpen.value = false;
+};
+
+// Modal functions
+const toggleEmojiPicker = () => {
+  showEmojiPicker.value = !showEmojiPicker.value;
+  console.log("EmojiPicker");
+};
 
 const addReactionRole = async () => {
   try {
     const sessionId: string | undefined = Cookies.get(settings.SESSION_ID_COOKIE);
-    console.log('Session ID:', sessionId);
-
-    if (!sessionId) {
-      console.error('Session ID not found');
+    if (!sessionId || !selectedChannelId.value) {
+      errorMessage.value = 'Session or Channel ID not found..';
       return;
     }
 
-    if (!selectedChannel.value) {
-      console.error('Channel not selected');
-      return;
-    }
-
-    const reactionRoles = emojiRoles.value.map(er => ({
+    const reactionRolesData = emojiRoles.value.map((er) => ({
       emoji: er.emoji,
       role_id: er.role?.id,
     }));
-    console.log('Reaction Roles:', reactionRoles);
 
-    console.log('Guild ID:', guildId);
-    console.log('Channel ID:', selectedChannel.value);
-    console.log('Message:', messageContent.value);
 
-    const response = await axios.post(`${settings.BACKEND_URL}/reaction_role/reaction_role`, reactionRoles, {
+    await axios.post(`${settings.BACKEND_URL}/reaction_role/reaction_role`, reactionRolesData, {
       params: {
         session_id: sessionId,
         guild_id: guildId,
-        channel_id: selectedChannel.value,
+        channel_id: selectedChannelId.value,
         message: messageContent.value,
-        reaction_roles: reactionRoles
-      }
+        reaction_roles: reactionRolesData,
+      },
     });
 
-    console.log('API Response:', response.data);
+    console.log('ID:' + selectedChannelId.value);
+
     isAddReactionRoleModalOpen.value = false;
+    fetchReactionRoleMessages();
+
+    if (!selectedChannelId.value) {
+      errorMessage.value = 'Channel ID is not saved correctly.';
+      return;
+    }
   } catch (error: any) {
     errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.';
-    console.error('Failed to add reaction role:', error);
-    setTimeout(() => {
-      errorMessage.value = '';
-    }, 3500);
+    setTimeout(() => (errorMessage.value = ''), 3500);
   }
-}
+};
 
+const deleteReactionRoleMessage = async (message: ReactionRoleMessage) => {
+  try {
+    const sessionId: string | undefined = Cookies.get(settings.SESSION_ID_COOKIE);
+    if (sessionId) {
+      await axios.delete(`${settings.BACKEND_URL}/reaction_role/reaction_role`, {
+        params: {
+          session_id: sessionId,
+          guild_id: guildId,
+          channel_id: message.channel_id,
+          message_id: message.message_id,
+        },
+      });
+      reactionRoleMessages.value = reactionRoleMessages.value.filter((m) => m.message_id !== message.message_id);
+    }
+  } catch (error: any) {
+    errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.';
+    setTimeout(() => (errorMessage.value = ''), 3500);
+  }
+};
+
+// Fetch data
+const fetchGuildData = async () => {
+  try {
+    const sessionId: string | undefined = Cookies.get(settings.SESSION_ID_COOKIE);
+    if (sessionId) {
+      const channelsResponse = await axios.get(`${settings.BACKEND_URL}/user/guild_channels`, {
+        params: { session_id: sessionId, guild_id: guildId },
+      });
+      const textChannels = channelsResponse.data.filter((channel: any) => channel.type === 0);
+      const categories = channelsResponse.data.filter((channel: any) => channel.type === 4);
+      channels.value = categories
+        .filter((category: any) => textChannels.some((channel: any) => channel.parentId === category.id))
+        .map((category: any) => ({
+          ...category,
+          children: textChannels.filter((channel: any) => channel.parentId === category.id),
+        }));
+
+      const rolesResponse = await axios.get(`${settings.BACKEND_URL}/user/guild_roles`, {
+        params: { session_id: sessionId, guild_id: guildId },
+      });
+      roles.value = rolesResponse.data.sort((a: Role, b: Role) => b.position - a.position);
+
+      fetchReactionRoleMessages();
+    }
+  } catch (error) {
+    console.error('Data could not be loaded:', error);
+  }
+};
+
+const fetchReactionRoleMessages = async () => {
+  try {
+    const sessionId: string | undefined = Cookies.get(settings.SESSION_ID_COOKIE);
+    if (sessionId) {
+      const response = await axios.get(`${settings.BACKEND_URL}/reaction_role/reaction_roles`, {
+        params: { session_id: sessionId, guild_id: guildId },
+      });
+      reactionRoleMessages.value = response.data;
+    }
+  } catch (error) {
+    console.error('Reaction Role Messages could not be loaded:', error);
+  }
+};
+
+// Watcher
 watch(isAddReactionRoleModalOpen, (newValue) => {
   if (!newValue) {
     messageContent.value = '';
     selectedEmojis.value = [];
     emojiRoles.value = [];
-    selectedChannel.value = null;
+    selectedChannelId.value = null;
     isRolesDropdownOpen.value = {};
   }
 });
 
+// Hooks
+onMounted(fetchGuildData);
 </script>
 
 <template>
@@ -212,21 +260,53 @@ watch(isAddReactionRoleModalOpen, (newValue) => {
             Add Reaction Roles
           </button>
 
+          <div v-if="reactionRoleMessages.length > 0">
+            <h3>Existing Reaction Role Messages</h3>
+            <div v-for="message in reactionRoleMessages" :key="message.message_id">
+              <div class="reaction-role-message">
+                <p><strong>Message:</strong> {{ message.message }}</p>
+                <p>
+                  <strong>Channel:</strong>
+                  {{
+                    channels
+                      .flatMap((c) => c.children)
+                      .find((channel) => channel.id === message.channel_id)?.name
+                  }}
+                </p>
+                <div class="reactions">
+                  <span v-for="reaction in message.emoji_roles" :key="reaction.emoji">
+                    {{ reaction.emoji }} -
+                    <span class="role-with-color">
+                      {{ reaction.role_name }}
+                      <span class="role-color-indicator" :style="{
+                        backgroundColor:
+                          '#' + reaction.role_color.toString(16).padStart(6, '0'),
+                      }"></span>
+                    </span>
+                  </span>
+                </div>
+                <button class="danger-button" @click="deleteReactionRoleMessage(message)">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div v-if="isAddReactionRoleModalOpen" class="modal">
             <h2>Add Reaction Roles</h2>
             <label>
-              Message Content:
+              Message:
               <textarea v-model="messageContent"></textarea>
             </label>
             <label>
-              Channel:
+              Kanal:
               <div class="custom-dropdown">
                 <div class="dropdown-header" @click="toggleChannelDropdown">
                   {{
-                    selectedChannel
+                    selectedChannelId
                       ? channels
                         .flatMap((category) => category.children)
-                        .find((channel) => channel.id === selectedChannel)?.name
+                        .find((channel) => channel.id === selectedChannelId)?.name
                       : 'Select Channel'
                   }}
                 </div>
@@ -249,8 +329,7 @@ watch(isAddReactionRoleModalOpen, (newValue) => {
                 Select Emoji
               </button>
               <div v-if="showEmojiPicker">
-                <Picker :data="emojiIndex" set="twitter" title="Dominic Penis" showSkinTones="false"
-                  @select="handleEmojiSelect" />
+                <Picker :data="emojiIndex" set="twitter" title="Emoji auswählen" @select="handleEmojiSelect" />
               </div>
               <div>
                 <span v-for="emoji in selectedEmojis" :key="emoji">
@@ -259,20 +338,21 @@ watch(isAddReactionRoleModalOpen, (newValue) => {
                     <label>
                       <div class="custom-dropdown">
                         <div class="dropdown-header" @click.stop="(event) => toggleRolesDropdown(emoji, event)">
-                          {{emojiRoles.find(er => er.emoji === emoji)?.role?.name || 'Select Role'}}
+                          {{emojiRoles.find((er) => er.emoji === emoji)?.role?.name || 'Select Role'}}
                         </div>
                         <div v-if="isRolesDropdownOpen[emoji]" class="dropdown-list2">
                           <div v-for="role in roles" :key="role.id" class="role-item"
                             @click="addRoleToEmoji(emoji, role)">
                             <span class="role-color-indicator" :style="{
-                              backgroundColor: role.color === 0 ? '#99AAB5' : decimalToHex(role.color)
+                              backgroundColor:
+                                role.color === 0 ? '#99AAB5' : decimalToHex(role.color),
                             }"></span>
                             {{ role.name }}
                           </div>
                         </div>
                       </div>
                     </label>
-                    <button class="danger-button" @click="removeEmoji(emoji)">X</button>
+                    <button class="danger-button" @click="(event) => removeEmoji(emoji, event)">X</button>
                   </div>
                 </span>
               </div>
@@ -515,6 +595,7 @@ h2 {
 }
 
 .danger-button {
+  margin-top: 5px;
   padding: 12px 12px;
   font-size: 1.2em;
   color: #fff;
@@ -590,5 +671,58 @@ h2 {
   flex-grow: 1;
   text-align: left;
   max-width: 500px;
+}
+
+.reaction-role-message {
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: var(--secondary);
+  color: #fff;
+  font-size: 15px;
+}
+
+.reaction-role-message p {
+  margin: 5px 0;
+  font-size: 15px;
+}
+
+.reaction-role-message strong {
+  color: var(--accent);
+}
+
+.reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.reactions span {
+  background-color: #4a6591;
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+.reactions span strong {
+  color: var(--accent);
+}
+
+h3 {
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.role-with-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.role-color-indicator {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
 }
 </style>
