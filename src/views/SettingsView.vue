@@ -25,6 +25,8 @@ const isChannelDropdownOpen = ref(false);
 const showEmojiPicker = ref(false);
 const errorMessage = ref('');
 const emojiRoles = ref<{ emoji: string; role: Role | null }[]>([]);
+const reactionRoleType = ref<'STANDARD' | 'UNIQUE'>('STANDARD');
+const isTypeDropdownOpen = ref(false);
 
 // Constants
 const sections = ['Reaction Roles', 'Welcome'];
@@ -67,18 +69,14 @@ const decimalToHex = (decimal: number): string => {
 };
 
 // Emoji functions
-
-const handleSelect = (emoji: any) => {
-  handleEmojiSelect(emoji);
-  closePicker();
-};
 const handleEmojiSelect = (emoji: any) => {
-  selectedEmojis.value.push(emoji.native);
+  if (!selectedEmojis.value.includes(emoji.native)) {
+    selectedEmojis.value.push(emoji.native);
+  } else {
+    errorMessage.value = "You've already selected that emoji!";
+    setTimeout(() => (errorMessage.value = ''), 3500);
+  }
 };
-
-const closePicker = () => {
-  showEmojiPicker.value = showEmojiPicker.value;
-}
 
 const removeEmoji = (emojiToRemove: string, event: Event) => {
   selectedEmojis.value = selectedEmojis.value.filter((emoji) => emoji !== emojiToRemove);
@@ -136,14 +134,14 @@ const addReactionRole = async () => {
       role_id: er.role?.id,
     }));
 
-
     await axios.post(`${settings.BACKEND_URL}/reaction_role/reaction_role`, reactionRolesData, {
       params: {
         session_id: sessionId,
         guild_id: guildId,
         channel_id: selectedChannelId.value,
-        message: messageContent.value,
+        reaction_role_type: reactionRoleType.value,
         reaction_roles: reactionRolesData,
+        message: messageContent.value,
       },
     });
 
@@ -309,8 +307,9 @@ onMounted(fetchGuildData);
                         .find((channel) => channel.id === selectedChannelId)?.name
                       : 'Select Channel'
                   }}
+                  <span class="arrow" :class="{ open: isChannelDropdownOpen }"></span>
                 </div>
-                <div v-if="isChannelDropdownOpen" class="dropdown-list">
+                <div v-if="isChannelDropdownOpen" class="dropdown-list" :class="{ open: isChannelDropdownOpen }">
                   <div v-for="category in channels" :key="category.id">
                     <div class="category-header">
                       {{ category.name }}
@@ -340,8 +339,10 @@ onMounted(fetchGuildData);
                       <div class="custom-dropdown">
                         <div class="dropdown-header" @click.stop="(event) => toggleRolesDropdown(emoji, event)">
                           {{emojiRoles.find((er) => er.emoji === emoji)?.role?.name || 'Select Role'}}
+                          <span class="arrow" :class="{ open: isRolesDropdownOpen[emoji] }"></span>
                         </div>
-                        <div v-if="isRolesDropdownOpen[emoji]" class="dropdown-list2">
+                        <div v-if="isRolesDropdownOpen[emoji]" class="dropdown-list2"
+                          :class="{ open: isRolesDropdownOpen[emoji] }">
                           <div v-for="role in roles" :key="role.id" class="role-item"
                             @click="addRoleToEmoji(emoji, role)">
                             <span class="role-color-indicator" :style="{
@@ -356,6 +357,21 @@ onMounted(fetchGuildData);
                     <button class="danger-button" @click="(event) => removeEmoji(emoji, event)">X</button>
                   </div>
                 </span>
+              </div>
+            </label>
+            <label>
+              Type:
+              <div class="custom-dropdown">
+                <div class="dropdown-header" @click="isTypeDropdownOpen = !isTypeDropdownOpen">
+                  {{ reactionRoleType === 'STANDARD' ? 'Standard' : 'Unique' }}
+                  <span class="arrow" :class="{ open: isTypeDropdownOpen }"></span>
+                </div>
+                <div v-if="isTypeDropdownOpen" class="dropdown-list" :class="{ open: isTypeDropdownOpen }">
+                  <div class="channel-item" @click="reactionRoleType = 'STANDARD'; isTypeDropdownOpen = false">Standard
+                  </div>
+                  <div class="channel-item" @click="reactionRoleType = 'UNIQUE'; isTypeDropdownOpen = false">Unique
+                  </div>
+                </div>
               </div>
             </label>
             <button class="modal-add-button" @click="addReactionRole">
@@ -477,6 +493,8 @@ onMounted(fetchGuildData);
   background-color: var(--secondary);
   color: white;
   resize: none;
+  font-family: Arial, Helvetica;
+  font-size: 15px;
 }
 
 .emoji-select {
@@ -725,5 +743,114 @@ h3 {
   width: 15px;
   height: 15px;
   border-radius: 50%;
+}
+
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-header {
+  padding: 8px;
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  background-color: var(--secondary);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-header:hover {
+  background-color: var(--accent);
+}
+
+.dropdown-header .arrow {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 5px;
+  vertical-align: middle;
+  border-top: 5px solid white;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  transition: transform 0.3s ease-in-out;
+}
+
+.dropdown-list.open+.dropdown-header .arrow,
+.dropdown-list2.open+.dropdown-header .arrow,
+.dropdown-header.open .arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown-list,
+.dropdown-list2 {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  width: 100%;
+  background-color: var(--background);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  z-index: 10;
+  overflow: auto;
+  max-height: 300px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dropdown-list.open,
+.dropdown-list2.open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.category-header {
+  padding: 8px 12px;
+  background-color: #263652;
+  color: #eaf4f5;
+  font-weight: bold;
+  border-bottom: 1px solid var(--accent);
+}
+
+.channel-item,
+.role-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+
+.channel-item:hover,
+.role-item:hover {
+  background-color: #4a6591;
+}
+
+.role-color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.arrow {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 5px;
+  vertical-align: middle;
+  border-top: 5px solid black;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  transition: transform 0.3s ease-in-out;
+}
+
+.arrow.open {
+  transform: rotate(180deg);
 }
 </style>
