@@ -68,12 +68,22 @@ const openGuildSettings = async (guildId: string) => {
   <ErrorMessage :message="errorMessage" />
   <div v-if="!loading && session">
     <div class="guilds">
-      <div class="guild-card" v-for="guild in session.guilds" :key="guild.id" @click="openGuildSettings(guild.id)">
-        <div class="guild-icon-wrapper"
-          :class="{ 'bot-joined': botJoinedGuildIds.includes(guild.id), 'bot-not-joined': !botJoinedGuildIds.includes(guild.id) }">
+      <div class="guild-card" v-for="guild in session.guilds.filter(guild => botJoinedGuildIds.includes(guild.id))"
+        :key="guild.id" @click="openGuildSettings(guild.id)">
+        <div class="guild-icon-wrapper bot-joined">
           <img
             :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
-            alt="Guild Icon" class="guild-icon" :class="{ 'grayscale': !botJoinedGuildIds.includes(guild.id) }">
+            alt="Guild Icon" class="guild-icon">
+        </div>
+        <span class="guild-name">{{ guild.name }}</span>
+      </div>
+
+      <div class="guild-card" v-for="guild in session.guilds.filter(guild => !botJoinedGuildIds.includes(guild.id))"
+        :key="guild.id" @click="openGuildSettings(guild.id)">
+        <div class="guild-icon-wrapper bot-not-joined">
+          <img
+            :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
+            alt="Guild Icon" class="guild-icon grayscale">
         </div>
         <span class="guild-name">{{ guild.name }}</span>
       </div>
