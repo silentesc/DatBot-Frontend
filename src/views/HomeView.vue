@@ -1,75 +1,49 @@
 <script setup lang="ts">
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import type { Guild, Session } from "@/models";
-import settings from "@/settings.json";
-import { onMounted, ref } from 'vue';
+import { onMounted, computed } from 'vue';
+import { session, botJoinedGuildIds, isLoading, errorMessage, loadSessionData } from '@/session-manager.ts';
 import router from '@/router';
 import ErrorMessage from '@/components/ErrorMessage.vue';
+import axios from 'axios';
+import settings from "@/settings.json";
+import LandingPage from './LandingPage.vue';
 
-const errorMessage = ref("");
-
-const loading = ref(true);
-
-const session = ref<Session | null>(null);
-const botJoinedGuildIds = ref<Array<string>>([]);
-
-onMounted(async () => {
-  const sessionId: String | undefined = Cookies.get(settings.SESSION_ID_COOKIE)
-  if (!sessionId) {
-    loading.value = false;
-    return;
+onMounted(() => {
+  if (!session.value) {
+    loadSessionData();
   }
+});
 
-  await axios.get(`${settings.BACKEND_URL}/auth/validate_session`, { params: { session_id: sessionId } })
-    .then((response) => {
-      session.value = response.data;
-    }).catch((error) => {
-      if (error.status === 404) {
-        Cookies.remove(settings.SESSION_ID_COOKIE);
-      }
-    });
+const guildsJoinedByBot = computed(() => {
+  return session.value?.guilds.filter(guild => botJoinedGuildIds.value.includes(guild.id)) || [];
+});
 
-  await axios.get(`${settings.BACKEND_URL}/user/user_guilds`, { params: { session_id: sessionId } })
-    .then((response) => {
-      for (const entry of response.data) {
-        const guild: Guild = entry["guild"];
-        const botJoined = entry["bot_joined"];
-        if (botJoined) {
-          botJoinedGuildIds.value.push(guild.id);
-        }
-      }
-    }).catch((error) => {
-      errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.';
-      if (error.status === 404) {
-        Cookies.remove(settings.SESSION_ID_COOKIE);
-      }
-      setTimeout(() => {
-        errorMessage.value = '';
-      }, 3500);
-    });
-
-  loading.value = false;
+const guildsNotJoinedByBot = computed(() => {
+  return session.value?.guilds.filter(guild => !botJoinedGuildIds.value.includes(guild.id)) || [];
 });
 
 const openGuildSettings = async (guildId: string) => {
   if (botJoinedGuildIds.value.includes(guildId)) {
     router.push({ name: 'settings', params: { guildId } });
   } else {
-    await axios.get(`${settings.BACKEND_URL}/auth/invite`)
-      .then((response) => {
-        window.location.href = response.data;
-      });
+    try {
+      const response = await axios.get(`${settings.BACKEND_URL}/auth/invite`);
+      window.location.href = response.data;
+    } catch (error: any) {
+      errorMessage.value = error.response?.data?.message || error.message || 'An unknown error occurred.';
+      setTimeout(() => {
+        errorMessage.value = '';
+      }, 3500);
+    }
   }
 }
 </script>
 
 <template>
   <ErrorMessage :message="errorMessage" />
-  <div v-if="!loading && session">
+  <LandingPage v-if="!session" />
+  <div v-else-if="!isLoading && session">
     <div class="guilds">
-      <div class="guild-card" v-for="guild in session.guilds.filter(guild => botJoinedGuildIds.includes(guild.id))"
-        :key="guild.id" @click="openGuildSettings(guild.id)">
+      <div class="guild-card" v-for="guild in guildsJoinedByBot" :key="guild.id" @click="openGuildSettings(guild.id)">
         <div class="guild-icon-wrapper bot-joined">
           <img
             :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
@@ -78,8 +52,8 @@ const openGuildSettings = async (guildId: string) => {
         <span class="guild-name">{{ guild.name }}</span>
       </div>
 
-      <div class="guild-card" v-for="guild in session.guilds.filter(guild => !botJoinedGuildIds.includes(guild.id))"
-        :key="guild.id" @click="openGuildSettings(guild.id)">
+      <div class="guild-card" v-for="guild in guildsNotJoinedByBot" :key="guild.id"
+        @click="openGuildSettings(guild.id)">
         <div class="guild-icon-wrapper bot-not-joined">
           <img
             :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
@@ -88,6 +62,12 @@ const openGuildSettings = async (guildId: string) => {
         <span class="guild-name">{{ guild.name }}</span>
       </div>
     </div>
+  </div>
+  <div v-else-if="isLoading">
+    <p>Loading Data</p>
+  </div>
+  <div v-else>
+    <p></p>
   </div>
 </template>
 

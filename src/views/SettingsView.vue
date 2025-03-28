@@ -163,6 +163,14 @@ const addReactionRole = async () => {
   }
 };
 
+const updateCharacterCount = () => {
+  if (messageContent.value.length === 2000) {
+    messageContent.value = messageContent.value.slice(0, 2000);
+    errorMessage.value = 'Oops! You have reached the maximum character limit of 2000.';
+    setTimeout(() => (errorMessage.value = ''), 3500);
+  }
+};
+
 const deleteReactionRoleMessage = async (message: ReactionRoleMessage) => {
   try {
     const sessionId: string | undefined = Cookies.get(settings.SESSION_ID_COOKIE);
@@ -299,10 +307,11 @@ onMounted(fetchGuildData);
             <h2>Add Reaction Roles</h2>
             <label>
               Message:
-              <textarea v-model="messageContent"></textarea>
+              <textarea v-model="messageContent" @input="updateCharacterCount" maxlength="2000"></textarea>
+              <span class="character-count">{{ messageContent.length }}/2000</span>
             </label>
             <label>
-              Kanal:
+              Channel:
               <div class="custom-dropdown">
                 <div class="dropdown-header" @click="toggleChannelDropdown">
                   {{
@@ -500,8 +509,16 @@ onMounted(fetchGuildData);
   resize: none;
   font-family: Arial, Helvetica;
   font-size: 15px;
-  height: 200px;
+  height: 250px;
   outline: none;
+}
+
+.character-count {
+  display: block;
+  text-align: right;
+  font-size: 0.8em;
+  color: #aaa;
+  margin-top: 2px;
 }
 
 .emoji-select {
@@ -605,6 +622,7 @@ onMounted(fetchGuildData);
 ::-webkit-scrollbar {
   width: 8px;
   background-color: lightgray;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
