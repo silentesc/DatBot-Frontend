@@ -26,8 +26,7 @@ onMounted(async () => {
       session.value = response.data;
     }).catch((error) => {
       if (error.status === 404) {
-        console.log("Removing session id cookie");
-        // Cookies.remove(settings.SESSION_ID_COOKIE);
+        Cookies.remove(settings.SESSION_ID_COOKIE);
       }
     });
 
@@ -43,8 +42,7 @@ onMounted(async () => {
     }).catch((error) => {
       errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.';
       if (error.status === 404) {
-        console.log("Removing session id cookie");
-        // Cookies.remove(settings.SESSION_ID_COOKIE);
+        Cookies.remove(settings.SESSION_ID_COOKIE);
       }
       setTimeout(() => {
         errorMessage.value = '';

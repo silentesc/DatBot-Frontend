@@ -22,8 +22,7 @@ const login_with_discord = async () => {
 }
 
 const logout = () => {
-  console.log("Removing session id cookie");
-  // Cookies.remove(settings.SESSION_ID_COOKIE);
+  Cookies.remove(settings.SESSION_ID_COOKIE);
   window.location.reload();
 }
 
@@ -41,8 +40,7 @@ const loadSessionData = async () => {
       session.value = response.data;
     }).catch((error) => {
       if (error.status === 404) {
-        console.log("Removing session id cookie");
-        // Cookies.remove(settings.SESSION_ID_COOKIE);
+        Cookies.remove(settings.SESSION_ID_COOKIE);
         session.value = null;
       }
     });
@@ -59,8 +57,7 @@ const loadSessionData = async () => {
       }
     }).catch((error) => {
       if (error.status === 404) {
-        console.log("Removing session id cookie");
-        // Cookies.remove(settings.SESSION_ID_COOKIE);
+        Cookies.remove(settings.SESSION_ID_COOKIE);
         botJoinedGuildIds.value = [];
       }
     });
