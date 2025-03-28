@@ -38,7 +38,7 @@ watch(
     background-color: #f8d7da;
     color: #721c24;
     padding: 15px;
-    border: 1px solid #f5c6cb;
+    border: 1px solid #ad6a70;
     border-radius: 5px;
     z-index: 1000;
     opacity: 0;

@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import type { Guild, Session } from "@/models";
+import { RouterLink, RouterView, useRoute } from 'vue-router';
+import { session, logout, loadSessionData } from '@/session-manager.ts';
+import { onMounted } from 'vue';
 import settings from "@/settings.json";
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import axios from 'axios';
 
-const loading = ref(true);
-
-const session = ref<Session | null>(null);
-const botJoinedGuildIds = ref<Array<string>>([]);
-const router = useRouter();
-const route = useRoute();
+onMounted(() => {
+  loadSessionData();
+});
 
 const login_with_discord = async () => {
   await axios.get(`${settings.BACKEND_URL}/auth/login`)
@@ -20,63 +15,13 @@ const login_with_discord = async () => {
       window.location.href = response.data;
     });
 }
-
-const logout = () => {
-  Cookies.remove(settings.SESSION_ID_COOKIE);
-  window.location.reload();
-}
-
-const loadSessionData = async () => {
-  const sessionId: String | undefined = Cookies.get(settings.SESSION_ID_COOKIE)
-  if (!sessionId) {
-    session.value = null;
-    botJoinedGuildIds.value = [];
-    loading.value = false;
-    return;
-  }
-
-  await axios.get(`${settings.BACKEND_URL}/auth/validate_session`, { params: { session_id: sessionId } })
-    .then((response) => {
-      session.value = response.data;
-    }).catch((error) => {
-      if (error.status === 404) {
-        Cookies.remove(settings.SESSION_ID_COOKIE);
-        session.value = null;
-      }
-    });
-
-  await axios.get(`${settings.BACKEND_URL}/user/user_guilds`, { params: { session_id: sessionId } })
-    .then((response) => {
-      botJoinedGuildIds.value = [];
-      for (const entry of response.data) {
-        const guild: Guild = entry["guild"];
-        const botJoined = entry["bot_joined"];
-        if (botJoined) {
-          botJoinedGuildIds.value.push(guild.id);
-        }
-      }
-    }).catch((error) => {
-      if (error.status === 404) {
-        Cookies.remove(settings.SESSION_ID_COOKIE);
-        botJoinedGuildIds.value = [];
-      }
-    });
-
-  loading.value = false;
-};
-
-onMounted(() => {
-  loadSessionData();
-});
 </script>
 
 <template>
   <nav>
     <div class="link-container">
-      <RouterLink class="link" :to="{ name: 'HomeView' }">Home</RouterLink>
-      <RouterLink class="link" :to="{ name: 'HomeView' }">Placeholder</RouterLink>
-      <RouterLink class="link" :to="{ name: 'HomeView' }">Placeholder 2</RouterLink>
-      <RouterLink class="link" :to="{ name: 'HomeView' }">Placeholder 3</RouterLink>
+      <RouterLink class="link" :to="{ name: 'LandingPage' }">Home</RouterLink>
+      <RouterLink class="link" :to="{ name: 'HomeView' }">Dashboard</RouterLink>
     </div>
 
     <div class="auth-container">

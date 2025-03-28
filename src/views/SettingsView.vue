@@ -8,6 +8,7 @@ import data from 'emoji-mart-vue-fast/data/all.json';
 import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src';
 import ErrorMessage from '@/components/ErrorMessage.vue';
 
+
 const route = useRoute();
 const guildId = route.params.guildId as string;
 
@@ -54,8 +55,8 @@ interface Role {
 
 interface ReactionRoleMessage {
   message_id: string;
-  message: string;
   channel_id: string;
+  reaction_role_type: 'STANDARD' | 'UNIQUE';
   emoji_roles: {
     emoji: string;
     role_name: string;
@@ -73,7 +74,7 @@ const handleEmojiSelect = (emoji: any) => {
   if (!selectedEmojis.value.includes(emoji.native)) {
     selectedEmojis.value.push(emoji.native);
   } else {
-    errorMessage.value = "You've already selected that emoji!";
+    errorMessage.value = "Oops! You've already picked that emoji. You can only pick every emoji once.";
     setTimeout(() => (errorMessage.value = ''), 3500);
   }
 };
@@ -118,14 +119,18 @@ const selectChannelItem = (channelId: string | null) => {
 // Modal functions
 const toggleEmojiPicker = () => {
   showEmojiPicker.value = !showEmojiPicker.value;
-  console.log("EmojiPicker");
 };
 
 const addReactionRole = async () => {
+  if (!messageContent.value.trim()) {
+    errorMessage.value = "Oops, it looks like you forgot to write a message!";
+    setTimeout(() => (errorMessage.value = ''), 3500);
+    return;
+  }
   try {
     const sessionId: string | undefined = Cookies.get(settings.SESSION_ID_COOKIE);
     if (!sessionId || !selectedChannelId.value) {
-      errorMessage.value = 'Session or Channel ID not found..';
+      errorMessage.value = 'Looks like you have not selected a channel yet.';
       return;
     }
 
@@ -145,17 +150,23 @@ const addReactionRole = async () => {
       },
     });
 
-    console.log('ID:' + selectedChannelId.value);
-
     isAddReactionRoleModalOpen.value = false;
     fetchReactionRoleMessages();
 
     if (!selectedChannelId.value) {
-      errorMessage.value = 'Channel ID is not saved correctly.';
+      errorMessage.value = 'Oops! The channel ID didn\'t save correctly.';
       return;
     }
   } catch (error: any) {
-    errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.';
+    errorMessage.value = error.response?.data?.message || (error as Error).message || 'Oh, something unexpected happened.';
+    setTimeout(() => (errorMessage.value = ''), 3500);
+  }
+};
+
+const updateCharacterCount = () => {
+  if (messageContent.value.length === 2000) {
+    messageContent.value = messageContent.value.slice(0, 2000);
+    errorMessage.value = 'Oops! You have reached the maximum character limit of 2000.';
     setTimeout(() => (errorMessage.value = ''), 3500);
   }
 };
@@ -175,7 +186,7 @@ const deleteReactionRoleMessage = async (message: ReactionRoleMessage) => {
       reactionRoleMessages.value = reactionRoleMessages.value.filter((m) => m.message_id !== message.message_id);
     }
   } catch (error: any) {
-    errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.';
+    errorMessage.value = error.response?.data?.message || (error as Error).message || 'Looks like we couldn\'t delete that message right now.';
     setTimeout(() => (errorMessage.value = ''), 3500);
   }
 };
@@ -206,6 +217,7 @@ const fetchGuildData = async () => {
     }
   } catch (error) {
     console.error('Data could not be loaded:', error);
+    errorMessage.value = 'We couldn\'t load the server info. Please try again later.';
   }
 };
 
@@ -219,7 +231,7 @@ const fetchReactionRoleMessages = async () => {
       reactionRoleMessages.value = response.data;
     }
   } catch (error) {
-    console.error('Reaction Role Messages could not be loaded:', error);
+    errorMessage.value = 'Failed to get the reaction role messages. Please try again.';
   }
 };
 
@@ -262,7 +274,6 @@ onMounted(fetchGuildData);
             <h3>Existing Reaction Role Messages</h3>
             <div v-for="message in reactionRoleMessages" :key="message.message_id">
               <div class="reaction-role-message">
-                <p><strong>Message:</strong> {{ message.message }}</p>
                 <p>
                   <strong>Channel:</strong>
                   {{
@@ -270,6 +281,8 @@ onMounted(fetchGuildData);
                       .flatMap((c) => c.children)
                       .find((channel) => channel.id === message.channel_id)?.name
                   }}
+                  <br>
+                  <strong>Type:</strong> {{ message.reaction_role_type }}
                 </p>
                 <div class="reactions">
                   <span v-for="reaction in message.emoji_roles" :key="reaction.emoji">
@@ -294,10 +307,11 @@ onMounted(fetchGuildData);
             <h2>Add Reaction Roles</h2>
             <label>
               Message:
-              <textarea v-model="messageContent"></textarea>
+              <textarea v-model="messageContent" @input="updateCharacterCount" maxlength="2000"></textarea>
+              <span class="character-count">{{ messageContent.length }}/2000</span>
             </label>
             <label>
-              Kanal:
+              Channel:
               <div class="custom-dropdown">
                 <div class="dropdown-header" @click="toggleChannelDropdown">
                   {{
@@ -325,7 +339,7 @@ onMounted(fetchGuildData);
             <label>
               Emojis:
               <button class="emoji-select" @click="toggleEmojiPicker">
-                Select Emoji
+                Add Emoji(s) to selection
               </button>
               <div v-if="showEmojiPicker">
                 <Picker :data="emojiIndex" set="twitter" title="Select Emoji" @select="handleEmojiSelect"
@@ -375,7 +389,7 @@ onMounted(fetchGuildData);
               </div>
             </label>
             <button class="modal-add-button" @click="addReactionRole">
-              Add
+              Send Reaction Role Message
             </button>
             <button class="modal-close-button" @click="isAddReactionRoleModalOpen = false">
               Close
@@ -384,7 +398,7 @@ onMounted(fetchGuildData);
         </div>
       </div>
       <div v-else-if="selectedSection === 'Welcome'">
-        <p>Placeholder</p>
+        <p>Comming soon...</p>
       </div>
     </main>
   </div>
@@ -495,6 +509,16 @@ onMounted(fetchGuildData);
   resize: none;
   font-family: Arial, Helvetica;
   font-size: 15px;
+  height: 250px;
+  outline: none;
+}
+
+.character-count {
+  display: block;
+  text-align: right;
+  font-size: 0.8em;
+  color: #aaa;
+  margin-top: 2px;
 }
 
 .emoji-select {
@@ -598,6 +622,7 @@ onMounted(fetchGuildData);
 ::-webkit-scrollbar {
   width: 8px;
   background-color: lightgray;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -722,6 +747,7 @@ h2 {
   background-color: #4a6591;
   padding: 5px 10px;
   border-radius: 3px;
+  font-size: 15px;
 }
 
 .reactions span strong {
@@ -852,5 +878,15 @@ h3 {
 
 .arrow.open {
   transform: rotate(180deg);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
 }
 </style>
