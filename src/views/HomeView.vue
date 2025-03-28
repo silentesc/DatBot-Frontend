@@ -15,7 +15,7 @@ const session = ref<Session | null>(null);
 const botJoinedGuildIds = ref<Array<string>>([]);
 
 onMounted(async () => {
-  const sessionId: String | undefined = Cookies.get(settings.SESSION_ID_COOKIE)
+  const sessionId: String | undefined = Cookies.get(settings.SESSION_ID_COOKIE);
   if (!sessionId) {
     loading.value = false;
     return;
@@ -26,7 +26,8 @@ onMounted(async () => {
       session.value = response.data;
     }).catch((error) => {
       if (error.status === 404) {
-        Cookies.remove(settings.SESSION_ID_COOKIE);
+        console.log("Removing session id cookie");
+        // Cookies.remove(settings.SESSION_ID_COOKIE);
       }
     });
 
@@ -42,7 +43,8 @@ onMounted(async () => {
     }).catch((error) => {
       errorMessage.value = error.response?.data?.message || (error as Error).message || 'An unexpected error occurred.';
       if (error.status === 404) {
-        Cookies.remove(settings.SESSION_ID_COOKIE);
+        console.log("Removing session id cookie");
+        // Cookies.remove(settings.SESSION_ID_COOKIE);
       }
       setTimeout(() => {
         errorMessage.value = '';
