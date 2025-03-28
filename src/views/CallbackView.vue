@@ -25,6 +25,29 @@ onMounted(() => {
 </script>
 
 <template>
-    <h1>Callback</h1>
-    <h2 v-if="loading">Loading...</h2>
+    <<<<<<< HEAD <h1>Loading...</h1>
 </template>
+
+<style scoped>
+h1 {
+    text-align: center;
+    margin-top: 20%;
+    color: #fff;
+    background-image: linear-gradient(to right, #333 20%, #888 40%, #333 60%);
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+</style>
