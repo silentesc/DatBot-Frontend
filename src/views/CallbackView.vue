@@ -48,6 +48,5 @@ h1 {
 
     100% {
         background-position: 200% center;
-    }
-}
+    }}
 </style>
