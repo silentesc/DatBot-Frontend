@@ -74,9 +74,6 @@ onMounted(() => {
   <nav>
     <div class="link-container">
       <RouterLink class="link" :to="{ name: 'HomeView' }">Home</RouterLink>
-      <RouterLink class="link" :to="{ name: 'HomeView' }">Placeholder</RouterLink>
-      <RouterLink class="link" :to="{ name: 'HomeView' }">Placeholder 2</RouterLink>
-      <RouterLink class="link" :to="{ name: 'HomeView' }">Placeholder 3</RouterLink>
     </div>
 
     <div class="auth-container">
