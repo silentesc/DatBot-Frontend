@@ -384,7 +384,7 @@ onMounted(fetchGuildData);
         </div>
       </div>
       <div v-else-if="selectedSection === 'Welcome'">
-        <p>Placeholder</p>
+        <p>Comming soon...</p>
       </div>
     </main>
   </div>
@@ -495,6 +495,7 @@ onMounted(fetchGuildData);
   resize: none;
   font-family: Arial, Helvetica;
   font-size: 15px;
+  height: 200px;
 }
 
 .emoji-select {
