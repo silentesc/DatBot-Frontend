@@ -15,7 +15,7 @@ onMounted(() => {
     axios.get(`${settings.BACKEND_URL}/auth/discord/callback`, { params: { code: String(router.currentRoute.value.query.code) } })
         .then((response) => {
             const session: Session = response.data;
-            Cookies.set(settings.SESSION_ID_COOKIE, session.session_id, { expires: 7, secure: true });
+            Cookies.set(settings.SESSION_ID_COOKIE, session.session_id, { expires: 7, secure: true, sameSite: 'none' });
             emit('auth-changed');
             router.push({ name: 'HomeView' });
         });
