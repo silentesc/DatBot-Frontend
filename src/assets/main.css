@@ -1,8 +1,65 @@
-@import './base.css';
+:root {
+  --color-primary: #5560ff;
+  --color-secondary: #cfcfcf;
+  --color-danger: #df4848;
 
-#app {
-  max-width: 1280px;
+  --background-primary: #242424;
+  --background-secondary: #444444;
+
+  --font-family: 'Segoe UI';
+
+  --margin-small: 0.5rem;
+  --margin-normal: 1rem;
+  --margin-large: 2rem;
+
+  --padding-small: 0.5rem;
+  --padding-normal: 1rem;
+  --padding-large: 1.5rem;
+
+  --max-width: 1500px;
+
+  background-color: var(--background-primary);
   margin: 0 auto;
   padding: 2rem;
+
+  font-family: var(--font-family);
   font-weight: normal;
+  color: #fff;
+}
+
+button {
+  background-color: #000;
+
+  margin: var(--margin-small);
+  padding: var(--padding-small);
+
+  width: fit-content;
+  min-width: 100px;
+  height: 3rem;
+
+  font-size: 1.2rem;
+  font-family: var(--font-family);
+  
+  border: 0;
+  border-radius: 12px;
+  outline: 0;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+.button-primary {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.button-secondary {
+  background-color: var(--color-secondary);
+  color: #000;
+}
+
+.button-danger {
+  background-color: var(--color-danger);
+  color: #fff;
 }
