@@ -6,5 +6,5 @@ const props = defineProps<{
 
 <template>
     <h1>Welcome Message</h1>
-    {{ props.guildId }}
+    <h2>Coming soon...</h2>
 </template>

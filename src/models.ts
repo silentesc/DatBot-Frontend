@@ -25,6 +25,42 @@ export interface UserGuild {
     guild: Guild;
 }
 
+export interface Channel {
+    id: string;
+    name: string;
+    type: number;
+    parent_id: string;
+}
+
+export interface Role {
+    id: string;
+    name: string;
+    color: number;
+    position: number;
+    managed: boolean;
+}
+
+
+export interface EmojiRoleExtended {
+    emoji: string;
+    role_id: string;
+    role_name: string;
+    role_color: number;
+    role_position: number;
+}
+
+export interface ReactionRole {
+    message_id: string;
+    guild_id: string;
+    channel_id: string;
+    channel_name: string;
+    channel_type: number;
+    channel_parent_id: string;
+    type: string;
+    message: string;
+    emoji_roles: Array<EmojiRoleExtended>;
+}
+
 
 export enum Plugins {
     OVERVIEW = "overview",

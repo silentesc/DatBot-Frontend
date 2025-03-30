@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Plugins } from '@/models';
-import { computed, ref, defineEmits, defineProps } from 'vue';
+import { computed, ref, defineEmits, defineProps, onMounted } from 'vue';
 
 const navElement = ref<HTMLElement | null>(null);
 
@@ -28,9 +28,11 @@ const computedHeight = computed(() => {
 
 <template>
     <nav ref="navElement" :style="{ height: computedHeight }">
-        <a :class="{underline: props.plugin === Plugins.OVERVIEW}" @click="selectPlugin(Plugins.OVERVIEW)">Overview</a>
-        <a :class="{underline: props.plugin === Plugins.WELCOME_MESSAGE}" @click="selectPlugin(Plugins.WELCOME_MESSAGE)">Welcome Message</a>
-        <a :class="{underline: props.plugin === Plugins.REACTION_ROLES}" @click="selectPlugin(Plugins.REACTION_ROLES)">Reaction Roles</a>
+        <a :class="{ underline: props.plugin === Plugins.OVERVIEW }" @click="selectPlugin(Plugins.OVERVIEW)">Overview</a>
+        <a :class="{ underline: props.plugin === Plugins.WELCOME_MESSAGE }"
+            @click="selectPlugin(Plugins.WELCOME_MESSAGE)">Welcome Message</a>
+        <a :class="{ underline: props.plugin === Plugins.REACTION_ROLES }"
+            @click="selectPlugin(Plugins.REACTION_ROLES)">Reaction Roles</a>
     </nav>
 </template>
 
@@ -40,6 +42,7 @@ nav {
     /* Height is computed above */
 
     margin: var(--margin-large);
+    margin-left: 0;
     padding: var(--padding-large);
     background-color: var(--background-secondary);
     border-radius: 15px;
