@@ -3,7 +3,7 @@ import type { Session } from '@/models';
 import { SESSION_ID_COOKIE, BACKEND_URL } from '@/settings.json'
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { ref, defineEmits, onMounted } from 'vue';
+import { ref, defineEmits, defineProps, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 
 const props = defineProps<{
@@ -89,7 +89,7 @@ const logout = async () => {
         <div class="nav-content">
             <div>
                 <RouterLink class="router-link" :to="{ name: 'HomeView' }">Home</RouterLink>
-                <RouterLink class="router-link" :to="{ name: 'DashboardView' }">Dashboard</RouterLink>
+                <RouterLink class="router-link" :to="{ name: 'GuildsView' }">Dashboard</RouterLink>
             </div>
             <div>
                 <div v-if="props.session">

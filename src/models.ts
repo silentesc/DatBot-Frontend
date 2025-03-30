@@ -19,7 +19,15 @@ export interface Session {
     expire_timestamp: Date
 }
 
+
 export interface UserGuild {
     bot_joined: boolean;
     guild: Guild;
+}
+
+
+export enum Plugins {
+    OVERVIEW = "overview",
+    WELCOME_MESSAGE = "welcome-message",
+    REACTION_ROLES = "reaction-roles",
 }

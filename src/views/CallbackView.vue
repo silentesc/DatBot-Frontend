@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Cookies from "js-cookie";
 import axios from 'axios';
-import { onMounted, ref, defineEmits } from 'vue';
+import { onMounted, ref, defineEmits, defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import settings from "@/settings.json";
 import type { Session } from "@/models";
@@ -17,7 +17,7 @@ onMounted(async () => {
             const session: Session = response.data;
             Cookies.set(settings.SESSION_ID_COOKIE, session.session_id, { expires: 7, secure: true, sameSite: 'none' });
             emit("authenticated", session);
-            router.push({ name: "DashboardView" });
+            router.push({ name: "GuildsView" });
         });
 
     loading.value = false;

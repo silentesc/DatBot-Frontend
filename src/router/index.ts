@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import CallbackView from '@/views/CallbackView.vue'
+import GuildsView from '@/views/GuildsView.vue'
 import DashboardView from '@/views/DashboardView.vue'
-import DashboardGuildView from '@/views/DashboardGuildView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,15 +19,21 @@ const router = createRouter({
     },
     {
       path: "/dashboard",
-      name: "DashboardView",
-      component: DashboardView,
+      name: "GuildsView",
+      component: GuildsView,
     },
     {
       path: "/dashboard/:guildId",
-      name: "DashboardGuildView",
-      component: DashboardGuildView,
+      redirect: (to) => {
+        return { path: `/dashboard/${to.params.guildId}/overview` };
+      },
+    },
+    {
+      path: "/dashboard/:guildId/:plugin",
+      name: "DashboardView",
+      component: DashboardView,
     },
   ],
-})
+});
 
 export default router

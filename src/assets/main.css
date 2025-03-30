@@ -21,6 +21,7 @@
   background-color: var(--background-primary);
   margin: 0 auto;
   padding: 2rem;
+  height: calc(100% - 2rem * 2);
 
   font-family: var(--font-family);
   font-weight: normal;
