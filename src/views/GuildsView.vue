@@ -51,14 +51,14 @@ onMounted(async () => {
 <template>
     <div>
         <div v-if="userGuilds" class="user-guild-container">
-            <div v-for="userGuild in userGuilds" class="user-guild-card">
+            <div v-for="userGuild in userGuilds" :key="userGuild.guild.id" class="user-guild-card">
                 <img :class="{ 'guild-icon': true, 'grayscale': !userGuild.bot_joined }"
                     :src="userGuild.guild.icon ? `https://cdn.discordapp.com/icons/${userGuild.guild.id}/${userGuild.guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
                     alt="Guild Icon">
                 <p class="guild-name">{{ userGuild.guild.name }}</p>
-                <button v-if="userGuild.bot_joined" class="button-primary"
+                <button v-if="userGuild.bot_joined" class="button button-primary"
                     @click="manage(userGuild.guild.id)">Manage</button>
-                <button v-else class="button-secondary" @click="invite()">Invite</button>
+                <button v-else class="button button-secondary" @click="invite()">Invite</button>
             </div>
         </div>
     </div>

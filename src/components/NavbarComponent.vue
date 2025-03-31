@@ -3,7 +3,7 @@ import type { Session } from '@/models';
 import { SESSION_ID_COOKIE, BACKEND_URL } from '@/settings.json'
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { ref, defineEmits, defineProps, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 
 const props = defineProps<{
@@ -105,7 +105,7 @@ const logout = async () => {
                         </div>
                     </div>
                 </div>
-                <button v-else class="button-primary" @click="login">Login with Discord</button>
+                <button v-else class="button button-primary" @click="login">Login with Discord</button>
             </div>
         </div>
     </nav>

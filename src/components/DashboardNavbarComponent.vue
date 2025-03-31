@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Plugins } from '@/models';
-import { computed, ref, defineEmits, defineProps, onMounted } from 'vue';
+import { computed, ref } from 'vue';
 
 const navElement = ref<HTMLElement | null>(null);
 

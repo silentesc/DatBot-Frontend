@@ -5,9 +5,9 @@
         <h3>Title with h3</h3>
         <p>Text with p</p>
 
-        <button>Button</button>
-        <button class="button-primary">Primary</button>
-        <button class="button-secondary">Secondary</button>
-        <button class="button-danger">Danger</button>
+        <button class="button">Button</button>
+        <button class="button button-primary">Primary</button>
+        <button class="button button-secondary">Secondary</button>
+        <button class="button button-danger">Danger</button>
     </main>
 </template>

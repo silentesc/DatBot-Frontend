@@ -40,6 +40,11 @@ export interface Role {
     managed: boolean;
 }
 
+export interface EmojiRole {
+    emoji: string;
+    role_id: string;
+}
+
 
 export interface EmojiRoleExtended {
     emoji: string;

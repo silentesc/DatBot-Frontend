@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Cookies from "js-cookie";
 import axios from 'axios';
-import { onMounted, ref, defineEmits, defineProps } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import settings from "@/settings.json";
 import type { Session } from "@/models";

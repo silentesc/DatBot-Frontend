@@ -2,9 +2,10 @@
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import Cookies from 'js-cookie';
+import ReactionRoleCreatorComponent from '../ReactionRoleCreatorComponent.vue';
 
 import { SESSION_ID_COOKIE, BACKEND_URL } from "@/settings.json";
-import type { Channel, ReactionRole, Role } from '@/models';
+import type { Channel, EmojiRole, ReactionRole, Role } from '@/models';
 
 const props = defineProps<{
     guildId: string;
@@ -13,6 +14,8 @@ const props = defineProps<{
 const reactionRoles = ref<Array<ReactionRole> | null>(null);
 const channels = ref<Array<Channel> | null>(null);
 const roles = ref<Array<Role> | null>(null);
+
+const isCreateReactionRoleModalVisible = ref(false);
 
 /**
  * LOGIC
@@ -24,6 +27,30 @@ const decimalToHex = (decimal: number): string => {
 /**
  * API CALLS
  */
+
+const createReactionRole = async (channelId: string, type: string, emojiRoles: Array<EmojiRole>, message: string) => {
+    const sessionId = Cookies.get(SESSION_ID_COOKIE);
+
+    if (!sessionId) {
+        return;
+    }
+
+    await axios.post(`${BACKEND_URL}/reaction_role/reaction_role`, emojiRoles, {
+        params: {
+            session_id: sessionId,
+            guild_id: props.guildId,
+            channel_id: channelId,
+            reaction_role_type: type,
+            message: message,
+        },
+    })
+        .then((_) => {
+            window.location.reload();
+        })
+        .catch((error) => {
+            console.error("Creating a creation role failed with error:", error);
+        });
+}
 
 const deleteReactionRole = async (channelId: string, messageId: string) => {
     const sessionId = Cookies.get(SESSION_ID_COOKIE);
@@ -40,12 +67,12 @@ const deleteReactionRole = async (channelId: string, messageId: string) => {
             message_id: messageId,
         },
     })
-    .then((_) => {
-        window.location.reload();
-    })
-    .catch((error) => {
-        console.error("Error while deleting reaction role:", error);
-    });
+        .then((_) => {
+            window.location.reload();
+        })
+        .catch((error) => {
+            console.error("Error while deleting reaction role:", error);
+        });
 }
 
 /**
@@ -123,7 +150,8 @@ onMounted(async () => {
                     </div>
                 </td>
                 <td>
-                    <button class="button-danger" @click="deleteReactionRole(reactionRole.channel_id, reactionRole.message_id)">Delete</button>
+                    <button class="button button-danger"
+                        @click="deleteReactionRole(reactionRole.channel_id, reactionRole.message_id)">Delete</button>
                 </td>
             </tr>
         </tbody>
@@ -131,8 +159,11 @@ onMounted(async () => {
 
     <h2 v-else>No reaction roles yet...</h2>
 
-    <h1>Create a new reaction role</h1>
-    <!-- TODO -->
+    <ReactionRoleCreatorComponent v-if="channels && roles" :is-visible="isCreateReactionRoleModalVisible"
+        :channels="channels" :roles="roles" @close="isCreateReactionRoleModalVisible = false"
+        @create="createReactionRole" />
+
+    <button class="button button-primary" @click="isCreateReactionRoleModalVisible = true">Create Reaction Role</button>
 </template>
 
 <style scoped>

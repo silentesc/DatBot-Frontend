@@ -28,7 +28,7 @@
   color: #fff;
 }
 
-button {
+.button {
   background-color: #000;
 
   margin: var(--margin-small);
@@ -46,7 +46,7 @@ button {
   outline: 0;
 }
 
-button:hover {
+.button:hover {
   cursor: pointer;
 }
 
