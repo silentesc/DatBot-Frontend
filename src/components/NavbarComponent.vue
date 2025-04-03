@@ -43,14 +43,10 @@ const logout = async () => {
     }
 
     await axios.post(`${BACKEND_URL}/auth/logout`, null, { params: { session_id: sessionId } })
-        .then((_) => {
-            console.log("Logged out successfully.");
-        })
         .catch((error) => {
             console.error("Error during logout:", error);
         });
 
-    console.log("Removing cookie");
     Cookies.remove(SESSION_ID_COOKIE);
 
     emit("logout");
@@ -71,7 +67,6 @@ const logout = async () => {
         return;
     }
 
-    console.log("Validating session");
     await axios.get(`${BACKEND_URL}/auth/validate_session`, { params: { session_id: sessionId } })
         .then((response) => {
             emit("authenticated", response.data);

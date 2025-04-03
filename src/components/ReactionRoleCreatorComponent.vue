@@ -56,11 +56,6 @@ watchEffect(() => {
     if (message.value.length > maxMessageLength.value) {
         message.value = message.value.slice(0, maxMessageLength.value);
     }
-
-    console.log("EmojiRoles Updated")
-    for (const emojiRole of emojiRoles.value) {
-        console.log(emojiRole.emoji, emojiRole.role_id);
-    }
 });
 
 const deleteEmojiRole = (emoji: string) => {
