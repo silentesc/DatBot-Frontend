@@ -14,7 +14,7 @@ const userGuilds = ref<Array<UserGuild> | null>(null);
  * API CALLS
  */
 const manage = (guildId: string) => {
-    router.push({ name: "DashboardView", params: { guildId: guildId, plugin: Plugins.OVERVIEW } })
+    router.push({ name: "DashboardView", params: { guildId: guildId, plugin: Plugins.BOT_SETTINGS } })
 }
 
 const invite = async () => {

@@ -175,7 +175,7 @@ const createReactionRole = () => {
             <br> <br>
             <button class="button button-primary" @click="createReactionRole">Create Reaction Role</button>
 
-            <ErrorComponent :is-visible="errorMsg.length > 0" :error-message="errorMsg" @close="errorMsg = ''" />
+            <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg" @close="errorMsg = ''" />
         </div>
     </div>
 </template>

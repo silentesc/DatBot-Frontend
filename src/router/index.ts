@@ -25,7 +25,7 @@ const router = createRouter({
     {
       path: "/dashboard/:guildId",
       redirect: (to) => {
-        return { path: `/dashboard/${to.params.guildId}/overview` };
+        return { path: `/dashboard/${to.params.guildId}/bot-settings` };
       },
     },
     {

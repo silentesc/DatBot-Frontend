@@ -28,7 +28,7 @@ const computedHeight = computed(() => {
 
 <template>
     <nav ref="navElement" :style="{ height: computedHeight }">
-        <a :class="{ underline: props.plugin === Plugins.OVERVIEW }" @click="selectPlugin(Plugins.OVERVIEW)">Overview</a>
+        <a :class="{ underline: props.plugin === Plugins.BOT_SETTINGS }" @click="selectPlugin(Plugins.BOT_SETTINGS)">Bot Settings</a>
         <a :class="{ underline: props.plugin === Plugins.WELCOME_MESSAGE }"
             @click="selectPlugin(Plugins.WELCOME_MESSAGE)">Welcome Message</a>
         <a :class="{ underline: props.plugin === Plugins.REACTION_ROLES }"

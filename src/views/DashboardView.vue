@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DashboardNavbarComponent from '@/components/DashboardNavbarComponent.vue';
-import OverviewComponent from '@/components/plugins/OverviewComponent.vue';
+import BotSettingsComponent from '@/components/plugins/BotSettingsComponent.vue';
 import ReactionRoleComponent from '@/components/plugins/ReactionRoleComponent.vue';
 import WelcomeMessageComponent from '@/components/plugins/WelcomeMessageComponent.vue';
 import { Plugins } from '@/models';
@@ -24,7 +24,7 @@ const setPlugin = (newPlugin: string) => {
         <DashboardNavbarComponent :plugin="plugin" @plugin-selected="setPlugin" />
         
         <div class="dashboard-content">
-            <OverviewComponent v-if="plugin === Plugins.OVERVIEW" />
+            <BotSettingsComponent v-if="plugin === Plugins.BOT_SETTINGS" />
             <WelcomeMessageComponent v-else-if="plugin === Plugins.WELCOME_MESSAGE" :guild-id="guildId" />
             <ReactionRoleComponent v-else-if="plugin === Plugins.REACTION_ROLES" :guild-id="guildId" />
             <div v-else>

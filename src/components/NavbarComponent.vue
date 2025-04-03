@@ -115,6 +115,7 @@ const logout = async () => {
 nav {
     height: 40px;
 
+    margin: var(--margin-large);
     padding: var(--padding-large);
     background-color: var(--background-secondary);
     border-radius: 15px;

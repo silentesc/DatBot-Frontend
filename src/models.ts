@@ -68,7 +68,7 @@ export interface ReactionRole {
 
 
 export enum Plugins {
-    OVERVIEW = "overview",
+    BOT_SETTINGS = "bot-settings",
     WELCOME_MESSAGE = "welcome-message",
     REACTION_ROLES = "reaction-roles",
 }
