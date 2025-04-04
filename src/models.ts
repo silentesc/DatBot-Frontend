@@ -67,6 +67,14 @@ export interface ReactionRole {
 }
 
 
+export interface Log {
+    guild: Guild;
+    user: User;
+    action: string;
+    timestamp: Date;
+}
+
+
 export enum Plugins {
     BOT_SETTINGS = "bot-settings",
     WELCOME_MESSAGE = "welcome-message",

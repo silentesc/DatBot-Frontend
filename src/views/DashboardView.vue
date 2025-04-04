@@ -29,7 +29,7 @@ watchEffect(() => {
         <DashboardNavbarComponent :plugin="plugin" @plugin-selected="setPlugin" />
         
         <div class="dashboard-content">
-            <BotSettingsComponent v-if="plugin === Plugins.BOT_SETTINGS" />
+            <BotSettingsComponent v-if="plugin === Plugins.BOT_SETTINGS" :guild-id="guildId" />
             <WelcomeMessageComponent v-else-if="plugin === Plugins.WELCOME_MESSAGE" :guild-id="guildId" />
             <ReactionRoleComponent v-else-if="plugin === Plugins.REACTION_ROLES" :guild-id="guildId" />
             <div v-else>
