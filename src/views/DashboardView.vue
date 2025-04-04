@@ -4,7 +4,7 @@ import BotSettingsComponent from '@/components/plugins/BotSettingsComponent.vue'
 import ReactionRoleComponent from '@/components/plugins/ReactionRoleComponent.vue';
 import WelcomeMessageComponent from '@/components/plugins/WelcomeMessageComponent.vue';
 import { Plugins } from '@/models';
-import { ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
@@ -17,6 +17,11 @@ const setPlugin = (newPlugin: string) => {
     plugin.value = newPlugin;
     router.push({ name: 'DashboardView', params: { guildId: guildId.value, plugin: newPlugin } });
 }
+
+watchEffect(() => {
+    guildId.value = route.params.guildId as string;
+    plugin.value = route.params.plugin as string;
+});
 </script>
 
 <template>
