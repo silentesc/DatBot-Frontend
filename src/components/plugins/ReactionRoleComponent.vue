@@ -22,6 +22,7 @@ const isCreateReactionRoleModalVisible = ref(false);
  * LOGIC
  */
 const decimalToHex = (decimal: number): string => {
+    if (decimal === 0) return "#99aab5";
     return '#' + decimal.toString(16).padStart(6, '0');
 };
 
@@ -160,10 +161,6 @@ onMounted(async () => {
                 </tr>
             </tbody>
         </table>
-
-        <button class="button button-primary" @click="isCreateReactionRoleModalVisible = true">
-            Create Reaction Role
-        </button>
     </div>
 
     <LoadingComponent v-if="reactionRoles === null" :is-loading="reactionRoles === null" />
@@ -173,6 +170,11 @@ onMounted(async () => {
     <ReactionRoleCreatorComponent v-if="channels && roles" :is-visible="isCreateReactionRoleModalVisible"
         :channels="channels" :roles="roles" @close="isCreateReactionRoleModalVisible = false"
         @create="createReactionRole" />
+
+    <button v-if="reactionRoles !== null" class="button button-primary"
+        @click="isCreateReactionRoleModalVisible = true">
+        Create Reaction Role
+    </button>
 </template>
 
 <style scoped>
