@@ -5,6 +5,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import settings from "@/settings.json";
 import type { Session } from "@/models";
+import LoadingComponent from "@/components/LoadingComponent.vue";
 
 const loading = ref(true);
 const router = useRouter();
@@ -26,6 +27,6 @@ onMounted(async () => {
 
 <template>
     <div>
-        <h1>Callback View</h1>
+        <LoadingComponent v-if="loading" :is-loading="loading" />
     </div>
 </template>

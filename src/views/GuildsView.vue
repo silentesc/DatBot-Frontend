@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LoadingComponent from "@/components/LoadingComponent.vue";
 import { Plugins, type UserGuild } from "@/models";
 import { BACKEND_URL, SESSION_ID_COOKIE } from "@/settings.json";
 import axios from 'axios';
@@ -61,6 +62,12 @@ onMounted(async () => {
                 <button v-else class="button button-secondary" @click="invite()">Invite</button>
             </div>
         </div>
+
+        <LoadingComponent v-if="userGuilds === null" :is-loading="userGuilds === null" />
+
+        <h1 v-if="userGuilds !== null && userGuilds.length === 0">
+            No guilds found. You need admin or manage server permissions in at least 1 server
+        </h1>
     </div>
 </template>
 

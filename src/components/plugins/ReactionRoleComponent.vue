@@ -6,6 +6,7 @@ import ReactionRoleCreatorComponent from '../ReactionRoleCreatorComponent.vue';
 
 import { SESSION_ID_COOKIE, BACKEND_URL } from "@/settings.json";
 import type { Channel, EmojiRole, ReactionRole, Role } from '@/models';
+import LoadingComponent from '../LoadingComponent.vue';
 
 const props = defineProps<{
     guildId: string;
@@ -125,45 +126,53 @@ onMounted(async () => {
 
 <template>
     <h1>Existing reaction roles</h1>
-    <table v-if="reactionRoles && reactionRoles.length">
-        <thead>
-            <tr>
-                <th>Channel Name</th>
-                <th>Type</th>
-                <th>Emoji</th>
-                <th>Role Name</th>
-                <th style="width: 1%;">Delete</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="reactionRole in reactionRoles" :key="reactionRole.channel_name">
-                <td>#{{ reactionRole.channel_name }}</td>
-                <td>{{ reactionRole.type }}</td>
-                <td>
-                    <div v-for="emojiRole in reactionRole.emoji_roles" :key="emojiRole.emoji">
-                        {{ emojiRole.emoji }}
-                    </div>
-                </td>
-                <td>
-                    <div v-for="emojiRole in reactionRole.emoji_roles" :key="emojiRole.role_name">
-                        <span :style="{ color: decimalToHex(emojiRole.role_color) }">@{{ emojiRole.role_name }}</span>
-                    </div>
-                </td>
-                <td>
-                    <button class="button button-danger"
-                        @click="deleteReactionRole(reactionRole.channel_id, reactionRole.message_id)">Delete</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div v-if="reactionRoles && reactionRoles.length > 0">
+        <table>
+            <thead>
+                <tr>
+                    <th>Channel Name</th>
+                    <th>Type</th>
+                    <th>Emoji</th>
+                    <th>Role Name</th>
+                    <th style="width: 1%;">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="reactionRole in reactionRoles" :key="reactionRole.channel_name">
+                    <td>#{{ reactionRole.channel_name }}</td>
+                    <td>{{ reactionRole.type }}</td>
+                    <td>
+                        <div v-for="emojiRole in reactionRole.emoji_roles" :key="emojiRole.emoji">
+                            {{ emojiRole.emoji }}
+                        </div>
+                    </td>
+                    <td>
+                        <div v-for="emojiRole in reactionRole.emoji_roles" :key="emojiRole.role_name">
+                            <span :style="{ color: decimalToHex(emojiRole.role_color) }">
+                                @{{ emojiRole.role_name }}
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="button button-danger"
+                            @click="deleteReactionRole(reactionRole.channel_id, reactionRole.message_id)">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-    <h2 v-else>No reaction roles yet...</h2>
+        <button class="button button-primary" @click="isCreateReactionRoleModalVisible = true">
+            Create Reaction Role
+        </button>
+    </div>
+
+    <LoadingComponent v-if="reactionRoles === null" :is-loading="reactionRoles === null" />
+
+    <h2 v-if="reactionRoles !== null && reactionRoles.length === 0">No reaction roles yet...</h2>
 
     <ReactionRoleCreatorComponent v-if="channels && roles" :is-visible="isCreateReactionRoleModalVisible"
         :channels="channels" :roles="roles" @close="isCreateReactionRoleModalVisible = false"
         @create="createReactionRole" />
-
-    <button class="button button-primary" @click="isCreateReactionRoleModalVisible = true">Create Reaction Role</button>
 </template>
 
 <style scoped>

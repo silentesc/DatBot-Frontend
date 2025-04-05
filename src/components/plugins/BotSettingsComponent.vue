@@ -4,12 +4,13 @@ import { onMounted, ref } from 'vue';
 import { BACKEND_URL, SESSION_ID_COOKIE } from "@/settings.json";
 import Cookies from 'js-cookie';
 import type { Log } from '@/models';
+import LoadingComponent from '../LoadingComponent.vue';
 
 const props = defineProps<{
     guildId: string;
 }>();
 
-const logs = ref<Array<Log>>([]);
+const logs = ref<Array<Log> | null>(null);
 const limit = ref<number>(10);
 
 const getLogs = () => {
@@ -43,23 +44,29 @@ onMounted(() => {
 <template>
     <h1>Bot Settings</h1>
     <h2>Logs</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Action</th>
-                <th>Date / Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="log in logs" :key="log.timestamp.toString()">
-                <td>{{ log.user.username }}</td>
-                <td>{{ log.action }}</td>
-                <td>{{ new Date(log.timestamp).toISOString().replace('T', ' ').slice(0, 19) }}</td>
-            </tr>
-        </tbody>
-    </table>
-    <button v-if="limit <= logs.length" @click="getMoreLogs" class="button button-primary">Load more</button>
+    <div v-if="logs">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Date / Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="log in logs" :key="log.timestamp.toString()">
+                    <td>{{ log.user.username }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ new Date(log.timestamp).toISOString().replace('T', ' ').slice(0, 19) }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <button v-if="limit <= logs.length" @click="getMoreLogs" class="button button-primary">Load more</button>
+    </div>
+
+    <LoadingComponent v-if="logs === null" :is-loading="logs === null" />
+
+    <h2 v-if="logs !== null && logs.length === 0">No logs yet...</h2>
 </template>
 
 <style scoped>
