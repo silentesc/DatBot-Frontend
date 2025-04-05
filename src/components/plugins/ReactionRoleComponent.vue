@@ -181,6 +181,7 @@ onMounted(async () => {
 table {
     width: 100%;
     border-collapse: collapse;
+    background-color: var(--background-tertiary);
 }
 
 thead {
