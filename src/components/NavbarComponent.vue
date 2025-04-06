@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import type { Session } from '@/models';
-import { SESSION_ID_COOKIE, USER_ID_COOKIE, USER_USERNAME_COOKIE, USER_AVATAR_COOKIE, BACKEND_URL } from '@/settings.json';
+import { SESSION_ID_COOKIE, BACKEND_URL } from '@/settings.json';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { ref, onMounted, watchEffect } from 'vue';
-import { RouterLink } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 
 const props = defineProps<{
     session: Session | null;
 }>();
 
-const userId = ref<string | undefined>(Cookies.get(USER_ID_COOKIE));
-const userUsername = ref<string | undefined>(Cookies.get(USER_USERNAME_COOKIE));
-const userAvatar = ref<string | undefined>(Cookies.get(USER_AVATAR_COOKIE));
+const router = useRouter();
 
 const emit = defineEmits(["authenticated", "logout"]);
 
@@ -24,14 +22,6 @@ const dropdownOpen = ref(false);
 const toggleDropdown = () => {
     dropdownOpen.value = !dropdownOpen.value;
 }
-
-watchEffect(() => {
-    if (props.session) {
-        userId.value = props.session.user.id;
-        userUsername.value = props.session.user.username;
-        userAvatar.value = props.session.user.avatar;
-    }
-});
 
 /**
  * API CALLS
@@ -60,11 +50,9 @@ const logout = async () => {
         });
 
     Cookies.remove(SESSION_ID_COOKIE);
-    Cookies.remove(USER_ID_COOKIE);
-    Cookies.remove(USER_USERNAME_COOKIE);
-    Cookies.remove(USER_AVATAR_COOKIE);
 
     emit("logout");
+    await router.push({ name: "HomeView" });
 }
 
 /**
@@ -79,10 +67,6 @@ onMounted(async () => {
     }
 
     if (props.session) {
-        return;
-    }
-
-    if (userId.value && userUsername.value && userAvatar.value) {
         return;
     }
 
@@ -106,11 +90,12 @@ onMounted(async () => {
                 <RouterLink class="router-link" :to="{ name: 'GuildsView' }">Dashboard</RouterLink>
             </div>
             <div>
-                <div v-if="userId && userUsername && userAvatar">
+                <div v-if="session">
                     <div class="user-container" @click="toggleDropdown">
-                        <img class="user-avatar" :src="`https://cdn.discordapp.com/avatars/${userId}/${userAvatar}.png`"
+                        <img class="user-avatar"
+                            :src="`https://cdn.discordapp.com/avatars/${session.user.id}/${session.user.avatar}.png`"
                             alt="User Avatar">
-                        <span class="user-username">{{ userUsername }}</span>
+                        <span class="user-username">{{ session.user.username }}</span>
 
                         <!-- Dropdown menu -->
                         <div v-if="dropdownOpen" class="dropdown-menu">
