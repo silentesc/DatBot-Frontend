@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 
 const props = defineProps({
@@ -24,10 +24,9 @@ const emit = defineEmits(["close", "create"]);
 
 const closeModal = () => {
     emit('close');
-
 };
 
-watch(() => props.errorMessage, () => {
+const startCloseTimer = () => {
     if (props.errorMessage.length < 1) {
         return;
     }
@@ -37,6 +36,14 @@ watch(() => props.errorMessage, () => {
     currentIntervalId.value = setTimeout(() => {
         closeModal();
     }, 5000);
+}
+
+watch(() => props.errorMessage, () => {
+    startCloseTimer();
+});
+
+onMounted(() => {
+    startCloseTimer();
 });
 </script>
 
