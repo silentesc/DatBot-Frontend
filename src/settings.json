@@ -1,4 +1,7 @@
 {
     "BACKEND_URL": "http://localhost:8000",
-    "SESSION_ID_COOKIE": "session_id"
+    "SESSION_ID_COOKIE": "session_id",
+    "USER_ID_COOKIE": "user_id",
+    "USER_USERNAME_COOKIE": "user_username",
+    "USER_AVATAR_COOKIE": "user_avatar"
 }

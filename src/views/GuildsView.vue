@@ -35,7 +35,7 @@ onMounted(async () => {
     const sessionId = Cookies.get(SESSION_ID_COOKIE);
 
     if (!sessionId) {
-        router.push({ name: "HomeView" });
+        await router.push({ name: "HomeView" });
         return;
     }
 

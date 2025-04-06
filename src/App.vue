@@ -12,6 +12,7 @@ const authenticated = (session: Session) => {
 
 const logout = () => {
     currentSession.value = null;
+    window.location.reload();
 }
 </script>
 
