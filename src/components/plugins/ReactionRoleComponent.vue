@@ -12,6 +12,8 @@ const props = defineProps<{
     guildId: string;
 }>();
 
+const isReactionRoleCreationInProgress = ref<boolean>(false);
+
 const reactionRoles = ref<Array<ReactionRole> | null>(null);
 const channels = ref<Array<Channel> | null>(null);
 const roles = ref<Array<Role> | null>(null);
@@ -37,6 +39,8 @@ const createReactionRole = async (channelId: string, type: string, emojiRoles: A
         return;
     }
 
+    isReactionRoleCreationInProgress.value = true;
+
     await axios.post(`${BACKEND_URL}/reaction_role/reaction_role`, emojiRoles, {
         params: {
             session_id: sessionId,
@@ -47,11 +51,14 @@ const createReactionRole = async (channelId: string, type: string, emojiRoles: A
         },
     })
         .then((_) => {
+            isReactionRoleCreationInProgress.value = false;
             window.location.reload();
         })
         .catch((error) => {
             console.error("Creating a creation role failed with error:", error);
         });
+    
+    isReactionRoleCreationInProgress.value = false;
 }
 
 const deleteReactionRole = async (channelId: string, messageId: string) => {
@@ -164,6 +171,7 @@ onMounted(async () => {
     </div>
 
     <LoadingComponent v-if="reactionRoles === null" :is-loading="reactionRoles === null" />
+    <LoadingComponent v-if="isReactionRoleCreationInProgress" :is-loading="isReactionRoleCreationInProgress" message="Your reaction role is being created. If you have many emojis attached, this may take a few seconds." />
 
     <h2 v-if="reactionRoles !== null && reactionRoles.length === 0">No reaction roles yet...</h2>
 

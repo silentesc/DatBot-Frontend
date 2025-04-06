@@ -113,6 +113,7 @@ const createReactionRole = () => {
     }
 
     emit("create", channelId.value, type.value, emojiRoles.value, message.value);
+    emit("close");
 };
 </script>
 
