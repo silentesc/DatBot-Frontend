@@ -32,6 +32,7 @@ const getLogs = () => {
 }
 
 const getMoreLogs = () => {
+    logs.value = null;
     limit.value += 10;
     getLogs();
 }
@@ -44,7 +45,7 @@ onMounted(() => {
 <template>
     <h1>Bot Settings</h1>
     <h2>Logs</h2>
-    <div v-if="logs">
+    <div v-if="logs && logs.length > 0">
         <table>
             <thead>
                 <tr>
