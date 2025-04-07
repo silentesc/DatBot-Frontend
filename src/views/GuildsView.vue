@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import LoadingComponent from "@/components/LoadingComponent.vue";
-import { Plugins, type UserGuild } from "@/models";
+import { Plugins, type Session } from "@/models";
 import { BACKEND_URL, SESSION_ID_COOKIE } from "@/settings.json";
 import axios from 'axios';
 import Cookies from 'js-cookie';
@@ -9,7 +9,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-const userGuilds = ref<Array<UserGuild> | null>(null);
+const session = ref<Session | null>(null);
 
 /**
  * API CALLS
@@ -39,9 +39,9 @@ onMounted(async () => {
         return;
     }
 
-    await axios.get(`${BACKEND_URL}/user/user_guilds`, { params: { session_id: sessionId } })
+    await axios.get(`${BACKEND_URL}/auth/validate_session`, { params: { session_id: sessionId } })
         .then((response) => {
-            userGuilds.value = response.data;
+            session.value = response.data;
         })
         .catch((error) => {
             console.error("An error happened while getting user guilds:", error);
@@ -51,35 +51,35 @@ onMounted(async () => {
 
 <template>
     <div>
-        <div v-if="userGuilds" class="user-guild-container">
-            <div v-for="userGuild in userGuilds" :key="userGuild.guild.id" class="user-guild-card">
-                <img :class="{ 'guild-icon': true, 'grayscale': !userGuild.bot_joined }"
-                    :src="userGuild.guild.icon ? `https://cdn.discordapp.com/icons/${userGuild.guild.id}/${userGuild.guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
+        <div v-if="session" class="guild-container">
+            <div v-for="guild in session.guilds" :key="guild.id" class="guild-card">
+                <img :class="{ 'guild-icon': true, 'grayscale': !guild.bot_joined }"
+                    :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
                     alt="Guild Icon">
-                <p class="guild-name">{{ userGuild.guild.name }}</p>
-                <button v-if="userGuild.bot_joined" class="button button-primary"
-                    @click="manage(userGuild.guild.id)">Manage</button>
+                <p class="guild-name">{{ guild.name }}</p>
+                <button v-if="guild.bot_joined" class="button button-primary"
+                    @click="manage(guild.id)">Manage</button>
                 <button v-else class="button button-secondary" @click="invite()">Invite</button>
             </div>
         </div>
 
-        <LoadingComponent v-if="userGuilds === null" :is-loading="userGuilds === null" />
+        <LoadingComponent v-if="session?.guilds === null" :is-loading="session.guilds === null" />
 
-        <h1 v-if="userGuilds !== null && userGuilds.length === 0">
+        <h1 v-if="session !== null && session.guilds.length === 0">
             No guilds found. You need admin or manage server permissions in at least 1 server
         </h1>
     </div>
 </template>
 
 <style scoped>
-.user-guild-container {
+.guild-container {
     margin: var(--margin-large);
     display: flex;
     justify-content: center;
     text-align: center;
 }
 
-.user-guild-card {
+.guild-card {
     margin: var(--margin-normal);
     padding: var(--padding-normal);
     width: fit-content;

@@ -104,7 +104,7 @@ onMounted(async () => {
             console.error("Error while getting reaction roles", error);
         });
 
-    axios.get(`${BACKEND_URL}/user/guild_channels`, {
+    axios.get(`${BACKEND_URL}/guild/channels`, {
         params: { session_id: sessionId, guild_id: props.guildId },
     })
         .then((response) => {
@@ -117,7 +117,7 @@ onMounted(async () => {
             console.error("Error while getting guild channels", error);
         });
 
-    axios.get(`${BACKEND_URL}/user/guild_roles`, {
+    axios.get(`${BACKEND_URL}/guild/roles`, {
         params: { session_id: sessionId, guild_id: props.guildId },
     })
         .then((response) => {

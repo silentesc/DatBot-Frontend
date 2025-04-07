@@ -1,7 +1,8 @@
 export interface Guild {
     id: string;
     name: string;
-    icon: string;
+    icon: string | null;
+    bot_joined: boolean;
 }
 
 
@@ -19,11 +20,6 @@ export interface Session {
     expire_timestamp: Date
 }
 
-
-export interface UserGuild {
-    bot_joined: boolean;
-    guild: Guild;
-}
 
 export interface Channel {
     id: string;
