@@ -77,6 +77,7 @@ onMounted(async () => {
     display: flex;
     justify-content: center;
     text-align: center;
+    flex-wrap: wrap;
 }
 
 .guild-card {

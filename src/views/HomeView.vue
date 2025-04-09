@@ -112,6 +112,7 @@ h2 {
     background-color: var(--background-tertiary);
     position: relative;
     height: 40vh;
+    min-height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
