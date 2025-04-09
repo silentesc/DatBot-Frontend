@@ -6,6 +6,8 @@ import ErrorComponent from './ErrorComponent.vue';
 import data from "emoji-mart-vue-fast/data/all.json";
 import "@/assets/emoji-mart-style.css";
 import { Picker, EmojiIndex } from "emoji-mart-vue-fast/src";
+import ChannelSelectComponent from '@/components/ChannelSelectComponent.vue';
+import StringSelectComponent from './StringSelectComponent.vue';
 
 const props = defineProps({
     isVisible: {
@@ -31,7 +33,7 @@ const isEmojiPickerOpen = ref(false);
 
 const maxMessageLength = ref<number>(2000);
 
-const channelId = ref<string | null>((props.channels.length > 1) ? props.channels[0].id : null);
+const channelId = ref<string | undefined>(props.channels.find(channel => channel.type !== 4)?.id);
 const type = ref<string>("STANDARD");
 const emojiRoles = ref<Array<EmojiRole>>([]);
 const message = ref<string>("");
@@ -79,7 +81,7 @@ const handleEmojiSelect = (e: any) => {
  */
 
 const closeModal = () => {
-    channelId.value = (props.channels.length > 1) ? props.channels[0].id : null;
+    channelId.value = props.channels.find(channel => channel.type !== 4)?.id;
     type.value = "STANDARD";
     emojiRoles.value = [];
     message.value = "";
@@ -130,21 +132,14 @@ const createReactionRole = () => {
             <!-- Channel -->
             <div>
                 <h2>Channel</h2>
-                <select id="channel-select" v-if="props.channels" v-model="channelId">
-                    <option v-for="channel in props.channels" :key="channel.id" :value="channel.id">
-                        #{{ channel.name }}
-                    </option>
-                </select>
+                <ChannelSelectComponent v-if="props.channels" :channels="props.channels" v-model="channelId"/>
                 <p v-else>Loading channels...</p>
             </div>
 
             <!-- Type -->
             <div>
                 <h2>Type</h2>
-                <select id="type-select" v-model="type">
-                    <option value="STANDARD" key="STANDARD">Standard</option>
-                    <option value="UNIQUE" key="UNIQUE">Unique</option>
-                </select>
+                <StringSelectComponent :strings="['STANDARD', 'UNIQUE']" v-model="type"/>
             </div>
 
             <!-- EmojiRoles -->

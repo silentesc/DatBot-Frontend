@@ -57,7 +57,7 @@ const createReactionRole = async (channelId: string, type: string, emojiRoles: A
         .catch((error) => {
             console.error("Creating a creation role failed with error:", error);
         });
-    
+
     isReactionRoleCreationInProgress.value = false;
 }
 
@@ -108,9 +108,15 @@ onMounted(async () => {
         params: { session_id: sessionId, guild_id: props.guildId },
     })
         .then((response) => {
-            channels.value = response.data;
-            if (channels.value) {
-                channels.value = channels.value.filter((channel) => channel.type === 0);
+            let tempChannels: Array<Channel> = response.data;
+            const textChannels = tempChannels.filter((channel) => channel.type === 0);
+            const categoryChannels = tempChannels.filter((channel) => channel.type === 4).sort(function (a, b) { return a.position - b.position });
+
+            channels.value = []
+            for (const categoryChannel of categoryChannels) {
+                channels.value.push(categoryChannel);
+                const textChannelsToAdd: Array<Channel> = textChannels.filter(textChannel => textChannel.parent_id === categoryChannel.id).sort(function (a, b) { return a.position - b.position });
+                channels.value.push(...textChannelsToAdd);
             }
         })
         .catch((error) => {
@@ -121,10 +127,9 @@ onMounted(async () => {
         params: { session_id: sessionId, guild_id: props.guildId },
     })
         .then((response) => {
-            roles.value = response.data;
-            if (roles.value) {
-                roles.value = roles.value.filter((role) => role.name !== "@everyone" && !role.managed).sort((a, b) => b.position - a.position);
-            }
+            let tempRoles: Array<Role> = response.data;
+            tempRoles = tempRoles.filter((role) => role.name !== "@everyone" && !role.managed).sort((a, b) => b.position - a.position);
+            roles.value = tempRoles;
         })
         .catch((error) => {
             console.error("Error while getting guild roles", error);
@@ -171,7 +176,8 @@ onMounted(async () => {
     </div>
 
     <LoadingComponent v-if="reactionRoles === null" :is-loading="reactionRoles === null" />
-    <LoadingComponent v-if="isReactionRoleCreationInProgress" :is-loading="isReactionRoleCreationInProgress" message="Your reaction role is being created. If you have many emojis attached, this may take a few seconds." />
+    <LoadingComponent v-if="isReactionRoleCreationInProgress" :is-loading="isReactionRoleCreationInProgress"
+        message="Your reaction role is being created. If you have many emojis attached, this may take a few seconds." />
 
     <h2 v-if="reactionRoles !== null && reactionRoles.length === 0">No reaction roles yet...</h2>
 

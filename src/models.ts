@@ -26,6 +26,7 @@ export interface Channel {
     name: string;
     type: number;
     parent_id: string;
+    position: number;
 }
 
 export interface Role {
@@ -57,6 +58,7 @@ export interface ReactionRole {
     channel_name: string;
     channel_type: number;
     channel_parent_id: string;
+    channel_position: number;
     type: string;
     message: string;
     emoji_roles: Array<EmojiRoleExtended>;
