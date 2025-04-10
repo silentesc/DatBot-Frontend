@@ -4,7 +4,7 @@ import { ref, watchEffect } from 'vue';
 import ErrorComponent from './ErrorComponent.vue';
 
 import data from "emoji-mart-vue-fast/data/all.json";
-import "@/assets/emoji-mart-style.css";
+import "@/assets/css/emoji-mart-style.css";
 import { Picker, EmojiIndex } from "emoji-mart-vue-fast/src";
 import ChannelSelectComponent from '@/components/ChannelSelectComponent.vue';
 import StringSelectComponent from './StringSelectComponent.vue';

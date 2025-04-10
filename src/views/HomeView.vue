@@ -47,24 +47,24 @@ const login = () => {
             <h2>Features</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <img src="@/assets/reaction-roles.png" alt="Reaction Roles" />
+                    <img src="@/assets/images/reaction-roles.png" alt="Reaction Roles" />
                     <div class="feature-info">
                         <h3>Reaction Roles</h3>
                         <p>Effortlessly assign roles with interactive reactions.</p>
                     </div>
                 </div>
                 <div class="feature-card">
-                    <img src="@/assets/play-command.png" alt="Play Command" />
-                    <div class="feature-info">
-                        <h3>Play Command</h3>
-                        <p>Stream your favorite tunes directly to your server.</p>
-                    </div>
-                </div>
-                <div class="feature-card">
-                    <img src="@/assets/welcome.jpg" alt="Welcome Messages" />
+                    <img src="@/assets/images/welcome.jpg" alt="Welcome Messages" />
                     <div class="feature-info">
                         <h3>Welcome Messages</h3>
                         <p>Create custom greetings to welcome new members.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <img src="@/assets/images/welcome.jpg" alt="Auto Roles" />
+                    <div class="feature-info">
+                        <h3>Auto Roles</h3>
+                        <p>Asign roles automatically to new members.</p>
                     </div>
                 </div>
             </div>
@@ -73,7 +73,7 @@ const login = () => {
         <!-- Introduction Section -->
         <section class="introduction">
             <div class="intro-image">
-                <img src="@/assets/bot-intro.png" alt="Bot Introduction" />
+                <img src="@/assets/images/bot-intro.png" alt="Bot Introduction" />
             </div>
             <div class="intro-text">
                 <h2>About DatBot</h2>
@@ -167,9 +167,9 @@ h2 {
 }
 
 .feature-card img {
+    display: block;
     width: 100%;
-    height: 200px;
-    object-fit: cover;
+    height: auto;
 }
 
 .feature-info {
