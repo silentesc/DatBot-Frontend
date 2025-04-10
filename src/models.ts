@@ -76,5 +76,6 @@ export interface Log {
 export enum Plugins {
     BOT_SETTINGS = "bot-settings",
     WELCOME_MESSAGE = "welcome-message",
+    AUTO_ROLES = "auto-roles",
     REACTION_ROLES = "reaction-roles",
 }

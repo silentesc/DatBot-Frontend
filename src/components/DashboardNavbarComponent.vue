@@ -31,6 +31,8 @@ const computedHeight = computed(() => {
         <a :class="{ underline: props.plugin === Plugins.BOT_SETTINGS }" @click="selectPlugin(Plugins.BOT_SETTINGS)">Bot Settings</a>
         <a :class="{ underline: props.plugin === Plugins.WELCOME_MESSAGE }"
             @click="selectPlugin(Plugins.WELCOME_MESSAGE)">Welcome Message</a>
+        <a :class="{ underline: props.plugin === Plugins.AUTO_ROLES }"
+            @click="selectPlugin(Plugins.AUTO_ROLES)">Auto Roles</a>
         <a :class="{ underline: props.plugin === Plugins.REACTION_ROLES }"
             @click="selectPlugin(Plugins.REACTION_ROLES)">Reaction Roles</a>
     </nav>

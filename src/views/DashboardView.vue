@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DashboardNavbarComponent from '@/components/DashboardNavbarComponent.vue';
+import AutoRolesComponent from '@/components/plugins/AutoRolesComponent.vue';
 import BotSettingsComponent from '@/components/plugins/BotSettingsComponent.vue';
 import ReactionRoleComponent from '@/components/plugins/ReactionRoleComponent.vue';
 import WelcomeMessageComponent from '@/components/plugins/WelcomeMessageComponent.vue';
@@ -31,6 +32,7 @@ watchEffect(() => {
         <div class="dashboard-content">
             <BotSettingsComponent v-if="plugin === Plugins.BOT_SETTINGS" :guild-id="guildId" />
             <WelcomeMessageComponent v-else-if="plugin === Plugins.WELCOME_MESSAGE" :guild-id="guildId" />
+            <AutoRolesComponent v-else-if="plugin === Plugins.AUTO_ROLES" :guild-id="guildId" />
             <ReactionRoleComponent v-else-if="plugin === Plugins.REACTION_ROLES" :guild-id="guildId" />
             <div v-else>
                 <h1>Plugin not found</h1>
