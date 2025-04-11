@@ -73,6 +73,13 @@ export interface Log {
 }
 
 
+export interface WelcomeMessage {
+    channel: Channel;
+    guild: Guild;
+    message: string;
+}
+
+
 export enum Plugins {
     BOT_SETTINGS = "bot-settings",
     WELCOME_MESSAGE = "welcome-message",

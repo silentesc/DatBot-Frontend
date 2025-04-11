@@ -16,7 +16,7 @@ const props = defineProps({
 const currentIntervalId = ref<number | undefined>(undefined);
 const timerKey = ref(0);
 
-const emit = defineEmits(["close", "create"]);
+const emit = defineEmits(["close"]);
 
 /**
  * EMITS

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Channel } from '@/models';
-import { ref, computed, onMounted, onBeforeUnmount, watchEffect } from 'vue';
+import { ref, computed } from 'vue';
 
 // Define component props. Here we expect an array of channels and a current value.
 const props = defineProps<{
