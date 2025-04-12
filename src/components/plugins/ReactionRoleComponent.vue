@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import Cookies from 'js-cookie';
 import ReactionRoleCreatorComponent from '../ReactionRoleCreatorComponent.vue';
 
-import { SESSION_ID_COOKIE, BACKEND_URL } from "@/settings.json";
+import { SESSION_ID_COOKIE } from "@/settings.json";
 import type { Channel, EmojiRole, ReactionRole, Role } from '@/models';
 import LoadingComponent from '../LoadingComponent.vue';
+import { postReactionRole, deleteReactionRole as http_utils_deleteReactionRole, getReactionRoles } from '@/http_utils/reaction_role';
+import { getChannels, getRoles } from '@/http_utils/guild';
+import ErrorComponent from '../ErrorComponent.vue';
 
 const props = defineProps<{
     guildId: string;
 }>();
+
+const loading = ref(false);
+const errorMsg = ref("");
 
 const isReactionRoleCreationInProgress = ref<boolean>(false);
 
@@ -33,29 +38,16 @@ const decimalToHex = (decimal: number): string => {
  */
 
 const createReactionRole = async (channelId: string, type: string, emojiRoles: Array<EmojiRole>, message: string) => {
-    const sessionId = Cookies.get(SESSION_ID_COOKIE);
-
-    if (!sessionId) {
-        return;
-    }
-
     isReactionRoleCreationInProgress.value = true;
 
-    await axios.post(`${BACKEND_URL}/reaction_role/reaction_role`, emojiRoles, {
-        params: {
-            session_id: sessionId,
-            guild_id: props.guildId,
-            channel_id: channelId,
-            reaction_role_type: type,
-            message: message,
-        },
-    })
-        .then((_) => {
+    await postReactionRole(props.guildId, channelId, type, message, emojiRoles)
+        .then(_ => {
             isReactionRoleCreationInProgress.value = false;
             window.location.reload();
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("Creating a creation role failed with error:", error);
+            errorMsg.value = "Creating a creation role failed";
         });
 
     isReactionRoleCreationInProgress.value = false;
@@ -68,20 +60,18 @@ const deleteReactionRole = async (channelId: string, messageId: string) => {
         return;
     }
 
-    await axios.delete(`${BACKEND_URL}/reaction_role/reaction_role`, {
-        params: {
-            session_id: sessionId,
-            guild_id: props.guildId,
-            channel_id: channelId,
-            message_id: messageId,
-        },
-    })
-        .then((_) => {
+    loading.value = true;
+
+    await http_utils_deleteReactionRole(props.guildId, channelId, messageId)
+        .then(_ => {
             window.location.reload();
         })
         .catch((error) => {
             console.error("Error while deleting reaction role:", error);
+            errorMsg.value = "Error while deleting reaction role";
         });
+
+    loading.value = false;
 }
 
 /**
@@ -94,46 +84,36 @@ onMounted(async () => {
         return;
     }
 
-    axios.get(`${BACKEND_URL}/reaction_role/reaction_roles`, {
-        params: { session_id: sessionId, guild_id: props.guildId },
-    })
-        .then((response) => {
-            reactionRoles.value = response.data;
+    loading.value = true;
+
+    getReactionRoles(props.guildId)
+        .then((rr: Array<ReactionRole>) => {
+            reactionRoles.value = rr;
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("Error while getting reaction roles", error);
+            errorMsg.value = "Error while getting reaction roles";
         });
 
-    axios.get(`${BACKEND_URL}/guild/channels`, {
-        params: { session_id: sessionId, guild_id: props.guildId },
-    })
-        .then((response) => {
-            let tempChannels: Array<Channel> = response.data;
-            const textChannels = tempChannels.filter((channel) => channel.type === 0);
-            const categoryChannels = tempChannels.filter((channel) => channel.type === 4).sort(function (a, b) { return a.position - b.position });
-
-            channels.value = textChannels.filter(textChannel => textChannel.parent_id === null);
-            for (const categoryChannel of categoryChannels) {
-                channels.value.push(categoryChannel);
-                const textChannelsToAdd: Array<Channel> = textChannels.filter(textChannel => textChannel.parent_id === categoryChannel.id).sort(function (a, b) { return a.position - b.position });
-                channels.value.push(...textChannelsToAdd);
-            }
+    getChannels(props.guildId)
+        .then((c: Array<Channel>) => {
+            channels.value = c;
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("Error while getting guild channels", error);
+            errorMsg.value = "Error while getting guild channels";
         });
 
-    axios.get(`${BACKEND_URL}/guild/roles`, {
-        params: { session_id: sessionId, guild_id: props.guildId },
-    })
-        .then((response) => {
-            let tempRoles: Array<Role> = response.data;
-            tempRoles = tempRoles.filter((role) => role.name !== "@everyone" && !role.managed).sort((a, b) => b.position - a.position);
-            roles.value = tempRoles;
+    getRoles(props.guildId)
+        .then((r: Array<Role>) => {
+            roles.value = r;
         })
         .catch((error) => {
             console.error("Error while getting guild roles", error);
+            errorMsg.value = "Error while getting guild roles";
         });
+
+    loading.value = false;
 });
 </script>
 
@@ -175,7 +155,8 @@ onMounted(async () => {
         </table>
     </div>
 
-    <LoadingComponent v-if="reactionRoles === null" :is-loading="reactionRoles === null" />
+    <LoadingComponent v-if="loading" :is-loading="loading" />
+
     <LoadingComponent v-if="isReactionRoleCreationInProgress" :is-loading="isReactionRoleCreationInProgress"
         message="Your reaction role is being created. If you have many emojis attached, this may take a few seconds." />
 
@@ -189,6 +170,9 @@ onMounted(async () => {
         @click="isCreateReactionRoleModalVisible = true">
         Create Reaction Role
     </button>
+
+    <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg"
+        @close="errorMsg = ''" />
 </template>
 
 <style scoped>

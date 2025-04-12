@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import LoadingComponent from "@/components/LoadingComponent.vue";
 import { Plugins, type Session } from "@/models";
-import { BACKEND_URL, SESSION_ID_COOKIE } from "@/settings.json";
-import axios from 'axios';
+import { SESSION_ID_COOKIE } from "@/settings.json";
+import { getInvite, getValidateSession } from "@/http_utils/auth";
 import Cookies from 'js-cookie';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import ErrorComponent from "@/components/ErrorComponent.vue";
 
 const router = useRouter();
+
+const errorMsg = ref("");
+const loading = ref(false);
 
 const session = ref<Session | null>(null);
 
@@ -19,13 +23,18 @@ const manage = (guildId: string) => {
 }
 
 const invite = async () => {
-    await axios.get(`${BACKEND_URL}/auth/invite`)
-        .then((response) => {
-            window.open(response.data, '_blank');
+    loading.value = true;
+
+    await getInvite()
+        .then(loginUrl => {
+            window.open(loginUrl, '_blank');
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("Error while getting invite url:", error);
+            errorMsg.value = "Error while getting invite url";
         });
+
+    loading.value = false;
 }
 
 /**
@@ -39,13 +48,18 @@ onMounted(async () => {
         return;
     }
 
-    await axios.get(`${BACKEND_URL}/auth/validate_session`, { params: { session_id: sessionId } })
-        .then((response) => {
-            session.value = response.data;
+    loading.value = true;
+
+    await getValidateSession()
+        .then((s: Session) => {
+            session.value = s;
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("An error happened while getting user guilds:", error);
+            errorMsg.value = "An error happened while getting user guilds";
         });
+
+    loading.value = false;
 });
 </script>
 
@@ -57,17 +71,19 @@ onMounted(async () => {
                     :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
                     alt="Guild Icon">
                 <p class="guild-name">{{ guild.name }}</p>
-                <button v-if="guild.bot_joined" class="button button-primary"
-                    @click="manage(guild.id)">Manage</button>
+                <button v-if="guild.bot_joined" class="button button-primary" @click="manage(guild.id)">Manage</button>
                 <button v-else class="button button-secondary" @click="invite()">Invite</button>
             </div>
         </div>
 
-        <LoadingComponent v-if="session?.guilds === null" :is-loading="session.guilds === null" />
+        <LoadingComponent v-if="loading" :is-loading="loading" />
 
         <h1 v-if="session !== null && session.guilds.length === 0">
             No guilds found. You need admin or manage server permissions in at least 1 server
         </h1>
+
+        <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg"
+            @close="errorMsg = ''" />
     </div>
 </template>
 

@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import type { Session } from '@/models';
-import { SESSION_ID_COOKIE, BACKEND_URL } from '@/settings.json';
-import axios from 'axios';
+import { SESSION_ID_COOKIE } from '@/settings.json';
+import { getLogin, postLogout, getValidateSession } from "@/http_utils/auth";
+
 import Cookies from 'js-cookie';
 import { ref, onMounted } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
+import ErrorComponent from './ErrorComponent.vue';
 
 const props = defineProps<{
     session: Session | null;
 }>();
+
+const errorMsg = ref("");
 
 const router = useRouter();
 
@@ -28,25 +32,21 @@ const toggleDropdown = () => {
  */
 
 const login = async () => {
-    await axios.get(`${BACKEND_URL}/auth/login`)
-        .then((response) => {
-            window.location.href = response.data;
+    await getLogin()
+        .then(loginUrl => {
+            window.location.href = loginUrl;
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("Error while getting login url:", error);
+            errorMsg.value = "Error while getting login url";
         });
 }
 
 const logout = async () => {
-    const sessionId = Cookies.get(SESSION_ID_COOKIE);
-    if (!sessionId) {
-        console.warn("No session ID found. Cannot log out.");
-        return;
-    }
-
-    await axios.post(`${BACKEND_URL}/auth/logout`, null, { params: { session_id: sessionId } })
-        .catch((error) => {
+    await postLogout()
+        .catch(error => {
             console.error("Error during logout:", error);
+            errorMsg.value = "Error during logout";
         });
 
     Cookies.remove(SESSION_ID_COOKIE);
@@ -60,23 +60,23 @@ const logout = async () => {
  */
 
 onMounted(async () => {
-    const sessionId = Cookies.get(SESSION_ID_COOKIE);
-
-    if (!sessionId) {
-        return;
-    }
-
     if (props.session) {
         return;
     }
 
-    await axios.get(`${BACKEND_URL}/auth/validate_session`, { params: { session_id: sessionId } })
-        .then((response) => {
-            emit("authenticated", response.data);
+    const sessionId = Cookies.get(SESSION_ID_COOKIE);
+    if (!sessionId) {
+        return;
+    }
+
+    await getValidateSession()
+        .then((session: Session) => {
+            emit("authenticated", session);
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("Error while validating session:", error);
             console.log("Logging out because of failed validation...");
+            errorMsg.value = "Error while validating session";
             logout();
         });
 });
@@ -107,6 +107,7 @@ onMounted(async () => {
             </div>
         </div>
     </nav>
+    <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg" @close="errorMsg = ''" />
 </template>
 
 <style scoped>

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, watchEffect } from 'vue';
 import ChannelSelectComponent from '../ChannelSelectComponent.vue';
-import { BACKEND_URL, SESSION_ID_COOKIE } from "@/settings.json";
-import axios from 'axios';
+import { SESSION_ID_COOKIE } from "@/settings.json";
 import Cookies from 'js-cookie';
 import type { Channel, WelcomeMessage } from '@/models';
 import ErrorComponent from '../ErrorComponent.vue';
 import LoadingComponent from '../LoadingComponent.vue';
+import { putWelcomeMessage, deleteWelcomeMessage as http_utils_deleteWelcomeMessage, getWelcomeMessage } from '@/http_utils/welcome_message';
+import { getChannels } from '@/http_utils/guild';
 
 const props = defineProps<{
     guildId: string;
@@ -30,7 +31,7 @@ watchEffect(() => {
     }
 });
 
-const saveChanges = () => {
+const saveChanges = async () => {
     const sessionId = Cookies.get(SESSION_ID_COOKIE);
 
     if (!sessionId) {
@@ -48,24 +49,19 @@ const saveChanges = () => {
 
     loading.value = true;
 
-    axios.put(`${BACKEND_URL}/welcome_message/welcome_message`, null, {
-        params: {
-            session_id: sessionId,
-            guild_id: props.guildId,
-            channel_id: selectedChannelId.value,
-            message: message.value,
-        }
-    }).then((_) => {
-        window.location.reload();
-    }).catch((e) => {
-        console.error(e);
-        errorMsg.value = e.message;
-    });
+    await putWelcomeMessage(props.guildId, selectedChannelId.value, message.value)
+        .then(_ => {
+            window.location.reload();
+        })
+        .catch(e => {
+            console.error(e);
+            errorMsg.value = e.message;
+        });
 
     loading.value = false;
 }
 
-const deleteWelcomeMessage = () => {
+const deleteWelcomeMessage = async () => {
     const sessionId = Cookies.get(SESSION_ID_COOKIE);
 
     if (!sessionId) {
@@ -74,17 +70,14 @@ const deleteWelcomeMessage = () => {
 
     loading.value = true;
 
-    axios.delete(`${BACKEND_URL}/welcome_message/welcome_message`, {
-        params: {
-            session_id: sessionId,
-            guild_id: props.guildId,
-        }
-    }).then((_) => {
-        window.location.reload();
-    }).catch((e) => {
-        console.error(e);
-        errorMsg.value = e.message;
-    });
+    await http_utils_deleteWelcomeMessage(props.guildId)
+        .then(_ => {
+            window.location.reload();
+        })
+        .catch(e => {
+            console.error(e);
+            errorMsg.value = e.message;
+        });
 
     loading.value = false;
 }
@@ -101,39 +94,27 @@ onMounted(async () => {
 
     loading.value = true;
 
-    await axios.get(`${BACKEND_URL}/guild/channels`, {
-        params: { session_id: sessionId, guild_id: props.guildId },
-    })
-        .then((response) => {
-            let tempChannels: Array<Channel> = response.data;
-            const textChannels = tempChannels.filter((channel) => channel.type === 0);
-            const categoryChannels = tempChannels.filter((channel) => channel.type === 4).sort(function (a, b) { return a.position - b.position });
-
-            channels.value = textChannels.filter(textChannel => textChannel.parent_id === null);
-            for (const categoryChannel of categoryChannels) {
-                channels.value.push(categoryChannel);
-                const textChannelsToAdd: Array<Channel> = textChannels.filter(textChannel => textChannel.parent_id === categoryChannel.id).sort(function (a, b) { return a.position - b.position });
-                channels.value.push(...textChannelsToAdd);
-            }
+    await getChannels(props.guildId)
+        .then((c: Array<Channel>) => {
+            channels.value = c;
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("Error while getting guild channels", error);
+            errorMsg.value = "Error while getting guild channels";
         });
 
-    await axios.get(`${BACKEND_URL}/welcome_message/welcome_message`, {
-        params: { session_id: sessionId, guild_id: props.guildId },
-    })
-        .then((response) => {
-            if (response.data) {
-                const welcomeMessage: WelcomeMessage = response.data;
+    await getWelcomeMessage(props.guildId)
+        .then((welcomeMessage: WelcomeMessage | null) => {
+            if (welcomeMessage) {
                 selectedChannelId.value = welcomeMessage.channel.id;
                 message.value = welcomeMessage.message;
             }
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("Error while getting guild channels", error);
+            errorMsg.value = "Error while getting guild channels";
         });
-    
+
     loading.value = false;
 });
 </script>
@@ -149,16 +130,16 @@ onMounted(async () => {
     <div v-if="!loading">
         <h2>Channel</h2>
         <ChannelSelectComponent :channels="channels" v-model="selectedChannelId" />
-    
+
         <h2>Welcome Message</h2>
         <textarea v-model="message"></textarea>
         <p class="message-length">{{ message.length }} / {{ maxMessageLength }}</p>
-    
+
         <button class="button button-primary" @click="saveChanges">Save</button>
         <button class="button button-danger" @click="deleteWelcomeMessage">Delete</button>
     </div>
 
-    <LoadingComponent v-if="loading" :is-loading="loading"/>
+    <LoadingComponent v-if="loading" :is-loading="loading" />
 
     <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg"
         @close="errorMsg = ''" />

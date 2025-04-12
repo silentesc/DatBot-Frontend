@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import Cookies from 'js-cookie';
-import { SESSION_ID_COOKIE, BACKEND_URL } from "@/settings.json";
+import { SESSION_ID_COOKIE } from "@/settings.json";
+import { getLogin } from "@/http_utils/auth";
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import ErrorComponent from '@/components/ErrorComponent.vue';
 
 const router = useRouter();
+
+const errorMsg = ref("");
 
 const sessionId = ref<string | undefined>(Cookies.get(SESSION_ID_COOKIE));
 
@@ -13,16 +16,15 @@ const viewGuilds = () => {
     router.push({ name: "GuildsView" });
 }
 
-const login = () => {
-    const login = async () => {
-        await axios.get(`${BACKEND_URL}/auth/login`)
-            .then((response) => {
-                window.location.href = response.data;
-            })
-            .catch((error) => {
-                console.error("Error while getting login url:", error);
-            });
-    }
+const login = async () => {
+    await getLogin()
+        .then(loginUrl => {
+            window.location.href = loginUrl;
+        })
+        .catch(error => {
+            console.error("Error while getting login url:", error);
+            errorMsg.value = "Error while getting login url";
+        });
 }
 </script>
 
@@ -92,6 +94,8 @@ const login = () => {
         <footer class="footer">
             <p>Modern. Customizable. Reliable. DatBot - Your Ultimate Discord Companion.</p>
         </footer>
+
+        <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg" @close="errorMsg = ''" />
     </div>
 </template>
 

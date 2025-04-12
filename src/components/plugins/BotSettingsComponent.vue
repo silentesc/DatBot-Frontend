@@ -1,34 +1,41 @@
 <script setup lang="ts">
-import axios from 'axios';
 import { onMounted, ref } from 'vue';
-import { BACKEND_URL, SESSION_ID_COOKIE } from "@/settings.json";
+import { SESSION_ID_COOKIE } from "@/settings.json";
+import { getLogs as http_utils_getLogs } from "@/http_utils/log";
 import Cookies from 'js-cookie';
 import type { Log } from '@/models';
 import LoadingComponent from '../LoadingComponent.vue';
+import ErrorComponent from '../ErrorComponent.vue';
 
 const props = defineProps<{
     guildId: string;
 }>();
 
+const errorMsg = ref("");
+const loading = ref(false);
+
 const logs = ref<Array<Log> | null>(null);
 const limit = ref<number>(10);
 
-const getLogs = () => {
+const getLogs = async () => {
     const sessionId = Cookies.get(SESSION_ID_COOKIE);
 
     if (!sessionId) {
         return;
     }
 
-    axios.get(`${BACKEND_URL}/log/logs/${props.guildId}`, {
-        params: { session_id: sessionId, limit: limit.value },
-    })
-        .then((response) => {
-            logs.value = response.data;
+    loading.value = true;
+
+    await http_utils_getLogs(props.guildId, limit.value)
+        .then((l: Array<Log>) => {
+            logs.value = l;
         })
-        .catch((error) => {
+        .catch(error => {
             console.error("Error while getting logs", error);
+            errorMsg.value = "Error while getting logs";
         });
+
+    loading.value = false;
 }
 
 const getMoreLogs = () => {
@@ -65,7 +72,9 @@ onMounted(() => {
         <button v-if="limit <= logs.length" @click="getMoreLogs" class="button button-primary">Load more</button>
     </div>
 
-    <LoadingComponent v-if="logs === null" :is-loading="logs === null" />
+    <LoadingComponent v-if="loading" :is-loading="loading" />
+    <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg"
+        @close="errorMsg = ''" />
 
     <h2 v-if="logs !== null && logs.length === 0">No logs yet...</h2>
 </template>
