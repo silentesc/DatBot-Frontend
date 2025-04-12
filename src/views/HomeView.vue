@@ -49,21 +49,21 @@ const login = async () => {
             <h2>Features</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <img src="@/assets/images/reaction-roles.png" alt="Reaction Roles" />
+                    <img src="@/assets/images/reaction_role.png" alt="Reaction Roles" />
                     <div class="feature-info">
                         <h3>Reaction Roles</h3>
                         <p>Effortlessly assign roles with interactive reactions.</p>
                     </div>
                 </div>
                 <div class="feature-card">
-                    <img src="@/assets/images/welcome.jpg" alt="Welcome Messages" />
+                    <img src="@/assets/images/welcome_message.png" alt="Welcome Messages" />
                     <div class="feature-info">
                         <h3>Welcome Messages</h3>
                         <p>Create custom greetings to welcome new members.</p>
                     </div>
                 </div>
                 <div class="feature-card">
-                    <img src="@/assets/images/welcome.jpg" alt="Auto Roles" />
+                    <img src="@/assets/images/coming_soon.jpg" alt="Auto Roles" />
                     <div class="feature-info">
                         <h3>Auto Roles</h3>
                         <p>Asign roles automatically to new members.</p>
