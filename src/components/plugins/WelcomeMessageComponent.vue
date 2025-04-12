@@ -109,7 +109,7 @@ onMounted(async () => {
             const textChannels = tempChannels.filter((channel) => channel.type === 0);
             const categoryChannels = tempChannels.filter((channel) => channel.type === 4).sort(function (a, b) { return a.position - b.position });
 
-            channels.value = []
+            channels.value = textChannels.filter(textChannel => textChannel.parent_id === null);
             for (const categoryChannel of categoryChannels) {
                 channels.value.push(categoryChannel);
                 const textChannelsToAdd: Array<Channel> = textChannels.filter(textChannel => textChannel.parent_id === categoryChannel.id).sort(function (a, b) { return a.position - b.position });
