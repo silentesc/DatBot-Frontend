@@ -5,7 +5,7 @@ import ErrorComponent from './ErrorComponent.vue';
 
 import data from "emoji-mart-vue-fast/data/all.json";
 import "@/assets/css/emoji-mart-style.css";
-import { Picker, EmojiIndex } from "emoji-mart-vue-fast/src";
+import { Picker, Emoji, EmojiIndex } from "emoji-mart-vue-fast/src";
 import ChannelSelectComponent from '@/components/ChannelSelectComponent.vue';
 import StringSelectComponent from './StringSelectComponent.vue';
 import RoleSelectComponent from './RoleSelectComponent.vue';
@@ -119,22 +119,22 @@ const createReactionRole = () => {
             <!-- Channel -->
             <div>
                 <h2>Channel</h2>
-                <ChannelSelectComponent v-if="props.channels" :channels="props.channels" v-model="channelId"/>
+                <ChannelSelectComponent v-if="props.channels" :channels="props.channels" v-model="channelId" />
                 <p v-else>Loading channels...</p>
             </div>
 
             <!-- Type -->
             <div>
                 <h2>Type</h2>
-                <StringSelectComponent :strings="['STANDARD', 'UNIQUE']" v-model="type"/>
+                <StringSelectComponent :strings="['STANDARD', 'UNIQUE']" v-model="type" />
             </div>
 
             <!-- EmojiRoles -->
             <div>
                 <h2>Emoji/Role Pairs</h2>
                 <div v-for="emojiRole in emojiRoles" class="emoji-role-card" :key="emojiRole.emoji">
-                    <span class="span-emoji">{{ emojiRole.emoji }}</span>
-                    <RoleSelectComponent :roles="roles" v-model="emojiRole.role_id"/>
+                    <Emoji class="span-emoji" :data="emojiIndex" set="twitter" :emoji="emojiRole.emoji" :size="32" />
+                    <RoleSelectComponent :roles="roles" v-model="emojiRole.role_id" />
                     <button class="button button-danger button-delete"
                         @click="deleteEmojiRole(emojiRole.emoji)">✕</button>
                 </div>
@@ -148,7 +148,8 @@ const createReactionRole = () => {
             <br> <br>
             <button class="button button-primary" @click="createReactionRole">Create Reaction Role</button>
 
-            <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg" @close="errorMsg = ''" />
+            <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg"
+                @close="errorMsg = ''" />
         </div>
     </div>
 </template>
@@ -226,7 +227,8 @@ option {
 }
 
 .span-emoji {
-    margin: var(--margin-large);
+    margin-left: var(--margin-large);
+    margin-right: var(--margin-large);
     font-size: 2rem;
     cursor: default;
 }

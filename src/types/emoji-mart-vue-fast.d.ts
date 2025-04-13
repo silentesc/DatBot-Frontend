@@ -9,6 +9,13 @@ declare module 'emoji-mart-vue-fast/src' {
         showSkinTones: string;
     }>;
 
+    export const Emoji: DefineComponent <{
+        data: any;
+        set: string;
+        emoji: string;
+        size: number;
+    }>;
+
     export class EmojiIndex {
         constructor(data: any);
         search(value: string, options?: any): EmojiData[];
