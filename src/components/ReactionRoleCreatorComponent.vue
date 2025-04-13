@@ -8,6 +8,7 @@ import "@/assets/css/emoji-mart-style.css";
 import { Picker, EmojiIndex } from "emoji-mart-vue-fast/src";
 import ChannelSelectComponent from '@/components/ChannelSelectComponent.vue';
 import StringSelectComponent from './StringSelectComponent.vue';
+import RoleSelectComponent from './RoleSelectComponent.vue';
 
 const props = defineProps({
     isVisible: {
@@ -41,20 +42,6 @@ const message = ref<string>("");
 /**
  * LOGIC
  */
-
-const getColorByRoleId = (roleId: string) => {
-    const role = props.roles.find(role => role.id === roleId);
-    if (!role) {
-        return decimalToHex(0);
-    }
-    return decimalToHex(role.color);
-}
-
-const decimalToHex = (decimal: number): string => {
-    if (decimal === 0) return "#99aab5";
-    return '#' + decimal.toString(16).padStart(6, '0');
-};
-
 watchEffect(() => {
     if (message.value.length > maxMessageLength.value) {
         message.value = message.value.slice(0, maxMessageLength.value);
@@ -115,7 +102,7 @@ const createReactionRole = () => {
     }
 
     emit("create", channelId.value, type.value, emojiRoles.value, message.value);
-    emit("close");
+    closeModal();
 };
 </script>
 
@@ -147,13 +134,7 @@ const createReactionRole = () => {
                 <h2>Emoji/Role Pairs</h2>
                 <div v-for="emojiRole in emojiRoles" class="emoji-role-card" :key="emojiRole.emoji">
                     <span class="span-emoji">{{ emojiRole.emoji }}</span>
-                    <select id="role-select" v-if="props.roles" v-model="emojiRole.role_id"
-                        :style="{ color: getColorByRoleId(emojiRole.role_id) }">
-                        <option v-for="role in props.roles" :key="role.id" :value="role.id"
-                            :style="{ color: decimalToHex(role.color) }">
-                            @{{ role.name }}
-                        </option>
-                    </select>
+                    <RoleSelectComponent :roles="roles" v-model="emojiRole.role_id"/>
                     <button class="button button-danger button-delete"
                         @click="deleteEmojiRole(emojiRole.emoji)">✕</button>
                 </div>

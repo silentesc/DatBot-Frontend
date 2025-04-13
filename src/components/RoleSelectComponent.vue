@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import type { Role } from '@/models';
 import { ref, computed } from 'vue';
 
-// Define component props. Here we expect an array of channels and a current value.
+// Define component props. Here we expect an array of roles and a current value.
 const props = defineProps<{
-    strings: Array<string>;
-    modelValue?: number | string | null;
+    roles: Array<Role>;
+    modelValue: string | null;
 }>();
 
 // Define the emit for v-model binding (using 'update:modelValue')
@@ -15,13 +16,10 @@ const emit = defineEmits<{
 // Reactive state for toggling the dropdown
 const isOpen = ref(false);
 
-// A ref to access the root element of the component for outside click detection.
-const componentRoot = ref<HTMLElement | null>(null);
-
 // Computed property to determine the selected option's text
 const selectedOptionText = computed(() => {
-    const s = props.strings.find(s => s === props.modelValue);
-    return s ? s : 'Select';
+    const option = props.roles.find(role => role.id === props.modelValue);
+    return option ? `@${option.name}` : "Select Role";
 });
 
 // Toggle dropdown open/close
@@ -30,23 +28,39 @@ function toggleDropdown() {
 }
 
 // Method to select an option and emit the value update
-function selectOption(s: string) {
-    emit('update:modelValue', s);
+function selectOption(role: Role) {
+    emit('update:modelValue', role.id);
     isOpen.value = false;
 }
+
+const getColorByRoleId = (roleId: string | null) => {
+    if (!roleId) {
+        return "#ffffff";
+    }
+    const role = props.roles.find(role => role.id === roleId);
+    if (!role) {
+        return decimalToHex(0);
+    }
+    return decimalToHex(role.color);
+}
+
+const decimalToHex = (decimal: number): string => {
+    if (decimal === 0) return "#99aab5";
+    return '#' + decimal.toString(16).padStart(6, '0');
+};
 </script>
 
 <template>
-    <div ref="componentRoot" class="custom-select" @click="toggleDropdown">
+    <div class="custom-select" @click="toggleDropdown">
         <!-- Selected Value -->
         <div class="select-trigger">
-            {{ selectedOptionText }}
+            <span :style="{color: getColorByRoleId(props.modelValue)}">{{ selectedOptionText }}</span>
             <span class="arrow" :class="{ open: isOpen }"></span>
         </div>
         <!-- Options List -->
         <div v-if="isOpen" class="options">
-            <div v-for="s in strings" :key="s" class="option" @click.stop="selectOption(s)">
-                {{ s }}
+            <div v-for="role in roles" :key="role.id" class="option" @click.stop="selectOption(role)">
+                <span class="span-text" :style="{color: getColorByRoleId(role.id)}">@{{ role.name }}</span>
             </div>
         </div>
     </div>
