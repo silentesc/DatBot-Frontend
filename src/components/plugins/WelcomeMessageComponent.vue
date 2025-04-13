@@ -13,6 +13,8 @@ const props = defineProps<{
     guildId: string;
 }>();
 
+const isWelcomeMessageSet = ref(false);
+
 const channels = ref<Array<Channel>>([]);
 const selectedChannelId = ref<string | undefined>(undefined);
 
@@ -108,6 +110,7 @@ onMounted(async () => {
             if (welcomeMessage) {
                 selectedChannelId.value = welcomeMessage.channel.id;
                 message.value = welcomeMessage.message;
+                isWelcomeMessageSet.value = true;
             }
         })
         .catch(error => {
@@ -120,18 +123,24 @@ onMounted(async () => {
 </script>
 
 <template>
-    <h3>Helpful variables</h3>
-    <p>
-        <span>{mention}</span> <span class="help-text">- Mentions the person</span> <br>
-        <span>{username}</span> <span class="help-text">- The username of the person</span> <br>
-        <span>{server_name}</span> <span class="help-text">- The name of the server</span> <br>
-    </p>
-
     <div v-if="!loading">
+        <h2>
+            Status:
+            <span :class="{ 'status-green': isWelcomeMessageSet, 'status-red': !isWelcomeMessageSet }">
+                {{ (isWelcomeMessageSet) ? "Active" : "Inactive" }}
+            </span>
+        </h2>
+
         <h2>Channel</h2>
         <ChannelSelectComponent :channels="channels" v-model="selectedChannelId" />
 
         <h2>Welcome Message</h2>
+        <h3>Helpful variables</h3>
+        <p>
+            <span>{mention}</span> <span class="help-text">- Mentions the person</span> <br>
+            <span>{username}</span> <span class="help-text">- The username of the person</span> <br>
+            <span>{server_name}</span> <span class="help-text">- The name of the server</span> <br>
+        </p>
         <textarea v-model="message"></textarea>
         <p class="message-length">{{ message.length }} / {{ maxMessageLength }}</p>
 
@@ -170,5 +179,13 @@ textarea {
 
 .button {
     margin: var(--margin-normal);
+}
+
+.status-green {
+    color: var(--color-success);
+}
+
+.status-red {
+    color: var(--color-danger);
 }
 </style>
