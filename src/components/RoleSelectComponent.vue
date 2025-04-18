@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Role } from '@/models';
+import { decimalToHex } from '@/utils/color_utils';
 import { ref, computed } from 'vue';
 
 // Define component props. Here we expect an array of roles and a current value.
@@ -43,11 +44,6 @@ const getColorByRoleId = (roleId: string | null) => {
     }
     return decimalToHex(role.color);
 }
-
-const decimalToHex = (decimal: number): string => {
-    if (decimal === 0) return "#99aab5";
-    return '#' + decimal.toString(16).padStart(6, '0');
-};
 </script>
 
 <template>

@@ -9,6 +9,7 @@ import LoadingComponent from '../LoadingComponent.vue';
 import { postReactionRole, deleteReactionRole as http_utils_deleteReactionRole, getReactionRoles } from '@/http_utils/reaction_role';
 import { getChannels, getRoles } from '@/http_utils/guild';
 import ErrorComponent from '../ErrorComponent.vue';
+import { decimalToHex } from '@/utils/color_utils';
 
 const props = defineProps<{
     guildId: string;
@@ -24,14 +25,6 @@ const channels = ref<Array<Channel> | null>(null);
 const roles = ref<Array<Role> | null>(null);
 
 const isCreateReactionRoleModalVisible = ref(false);
-
-/**
- * LOGIC
- */
-const decimalToHex = (decimal: number): string => {
-    if (decimal === 0) return "#99aab5";
-    return '#' + decimal.toString(16).padStart(6, '0');
-};
 
 /**
  * API CALLS
