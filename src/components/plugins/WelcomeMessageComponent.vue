@@ -53,7 +53,7 @@ const saveChanges = async () => {
 
     await putWelcomeMessage(props.guildId, selectedChannelId.value, message.value)
         .then(_ => {
-            window.location.reload();
+            isWelcomeMessageSet.value = true;
         })
         .catch(e => {
             console.error(e);
@@ -74,7 +74,9 @@ const deleteWelcomeMessage = async () => {
 
     await http_utils_deleteWelcomeMessage(props.guildId)
         .then(_ => {
-            window.location.reload();
+            isWelcomeMessageSet.value = false;
+            selectedChannelId.value = "";
+            message.value = "";
         })
         .catch(e => {
             console.error(e);
