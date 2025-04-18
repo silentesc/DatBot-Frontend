@@ -85,6 +85,7 @@ const getColorByRoleId = (roleId: string | null) => {
     border-width: 0 2px 2px 0;
     display: inline-block;
     padding: 4px;
+    margin-left: 6px;
     transform: rotate(45deg);
     transition: transform 0.2s ease;
 }
