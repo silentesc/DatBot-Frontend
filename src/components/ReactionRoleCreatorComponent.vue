@@ -134,7 +134,7 @@ const createReactionRole = () => {
                 <h2>Emoji/Role Pairs</h2>
                 <div v-for="emojiRole in emojiRoles" class="emoji-role-card" :key="emojiRole.emoji">
                     <Emoji class="span-emoji" :data="emojiIndex" set="twitter" :emoji="emojiRole.emoji" :size="32" />
-                    <RoleSelectComponent :roles="roles" v-model="emojiRole.role_id" />
+                    <RoleSelectComponent :roles="roles.filter(role => emojiRole.role_id === role.id || !emojiRoles.map(emojiRole => emojiRole.role_id).includes(role.id))" v-model="emojiRole.role_id" />
                     <button class="button button-danger button-delete"
                         @click="deleteEmojiRole(emojiRole.emoji)">✕</button>
                 </div>
