@@ -1,15 +1,15 @@
-import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
-import CallbackView from "@/views/CallbackView.vue";
-import SettingsView from "@/views/SettingsView.vue";
-import LandingPage from "@/views/LandingPage.vue";
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import CallbackView from '@/views/CallbackView.vue'
+import GuildsView from '@/views/GuildsView.vue'
+import DashboardView from '@/views/DashboardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/",
-      name: "HomeView",
+      path: '/',
+      name: 'HomeView',
       component: HomeView,
     },
     {
@@ -18,14 +18,20 @@ const router = createRouter({
       component: CallbackView,
     },
     {
-      path: "/settings/:guildId",
-      name: "settings",
-      component: SettingsView,
+      path: "/dashboard",
+      name: "GuildsView",
+      component: GuildsView,
     },
     {
-      path: "/",
-      name: "LandingPage",
-      component: LandingPage,
+      path: "/dashboard/:guildId",
+      redirect: (to) => {
+        return { path: `/dashboard/${to.params.guildId}/bot-settings` };
+      },
+    },
+    {
+      path: "/dashboard/:guildId/:plugin",
+      name: "DashboardView",
+      component: DashboardView,
     },
   ],
 });

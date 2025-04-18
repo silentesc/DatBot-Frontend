@@ -1,137 +1,236 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
-import { session, botJoinedGuildIds, isLoading, errorMessage, loadSessionData } from '@/session-manager.ts';
-import router from '@/router';
-import ErrorMessage from '@/components/ErrorMessage.vue';
-import axios from 'axios';
-import settings from "@/settings.json";
-import LandingPage from './LandingPage.vue';
+import Cookies from 'js-cookie';
+import { SESSION_ID_COOKIE } from "@/settings.json";
+import { getLogin } from "@/http_utils/auth";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import ErrorComponent from '@/components/ErrorComponent.vue';
 
-onMounted(() => {
-  if (!session.value) {
-    loadSessionData();
-  }
-});
+const router = useRouter();
 
-const guildsJoinedByBot = computed(() => {
-  return session.value?.guilds.filter(guild => botJoinedGuildIds.value.includes(guild.id)) || [];
-});
+const errorMsg = ref("");
 
-const guildsNotJoinedByBot = computed(() => {
-  return session.value?.guilds.filter(guild => !botJoinedGuildIds.value.includes(guild.id)) || [];
-});
+const sessionId = ref<string | undefined>(Cookies.get(SESSION_ID_COOKIE));
 
-const openGuildSettings = async (guildId: string) => {
-  if (botJoinedGuildIds.value.includes(guildId)) {
-    router.push({ name: 'settings', params: { guildId } });
-  } else {
-    try {
-      const response = await axios.get(`${settings.BACKEND_URL}/auth/invite`);
-      window.location.href = response.data;
-    } catch (error: any) {
-      errorMessage.value = error.response?.data?.message || error.message || 'An unknown error occurred.';
-      setTimeout(() => {
-        errorMessage.value = '';
-      }, 3500);
-    }
-  }
+const viewGuilds = () => {
+    router.push({ name: "GuildsView" });
+}
+
+const login = async () => {
+    await getLogin()
+        .then(loginUrl => {
+            window.location.href = loginUrl;
+        })
+        .catch(error => {
+            console.error("Error while getting login url:", error);
+            errorMsg.value = "Error while getting login url";
+        });
 }
 </script>
 
 <template>
-  <ErrorMessage :message="errorMessage" />
-  <LandingPage v-if="!session" />
-  <div v-else-if="!isLoading && session">
-    <div class="guilds">
-      <div class="guild-card" v-for="guild in guildsJoinedByBot" :key="guild.id" @click="openGuildSettings(guild.id)">
-        <div class="guild-icon-wrapper bot-joined">
-          <img
-            :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
-            alt="Guild Icon" class="guild-icon">
-        </div>
-        <span class="guild-name">{{ guild.name }}</span>
-      </div>
+    <div class="home">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Welcome to DatBot</h1>
+                <p>
+                    Your Discord Bot to customize your server seamlessly.
+                    <br>
+                    Free. No ads. No data selling.
+                </p>
+                <button v-if="sessionId" @click="viewGuilds" class="button button-primary">Go to Dashboard</button>
+                <button v-else @click="login" class="button button-primary">Login with Discord</button>
+            </div>
+        </section>
 
-      <div class="guild-card" v-for="guild in guildsNotJoinedByBot" :key="guild.id"
-        @click="openGuildSettings(guild.id)">
-        <div class="guild-icon-wrapper bot-not-joined">
-          <img
-            :src="guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
-            alt="Guild Icon" class="guild-icon grayscale">
-        </div>
-        <span class="guild-name">{{ guild.name }}</span>
-      </div>
+        <!-- Features Section -->
+        <section class="features">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <img src="@/assets/images/reaction_role.png" alt="Reaction Roles" />
+                    <div class="feature-info">
+                        <h3>Reaction Roles</h3>
+                        <p>Effortlessly assign roles with interactive reactions.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <img src="@/assets/images/welcome_message.png" alt="Welcome Messages" />
+                    <div class="feature-info">
+                        <h3>Welcome Messages</h3>
+                        <p>Create custom greetings to welcome new members.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <img src="@/assets/images/coming_soon.jpg" alt="Auto Roles" />
+                    <div class="feature-info">
+                        <h3>Auto Roles</h3>
+                        <p>Asign roles automatically to new members.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Introduction Section -->
+        <section class="introduction">
+            <div class="intro-image">
+                <img src="@/assets/images/bot-intro.png" alt="Bot Introduction" />
+            </div>
+            <div class="intro-text">
+                <h2>About DatBot</h2>
+                <p>
+                    DatBot is designed to make your life easier. Nobody wants to spend 30 minutes trying to get
+                    something simple working. That's why this project tries to make setting things up as intuitive as
+                    possible!
+                    <br> <br>
+                    This project is developed by a single person for fun, yet it has been made available for
+                    everyone to enjoy. That's why you won't find any ads or subscription-based features here.
+                </p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Modern. Customizable. Reliable. DatBot - Your Ultimate Discord Companion.</p>
+        </footer>
+
+        <ErrorComponent v-if="errorMsg.length > 0" :is-visible="errorMsg.length > 0" :error-message="errorMsg" @close="errorMsg = ''" />
     </div>
-  </div>
-  <div v-else-if="isLoading">
-    <p>Loading Data</p>
-  </div>
-  <div v-else>
-    <p></p>
-  </div>
 </template>
 
-<style lang="css" scoped>
-.guilds {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 20px;
+<style scoped>
+h1,
+h2 {
+    color: var(--color-primary)
 }
 
-.guild-card {
-  width: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: var(--background);
-  padding: 20px;
-  border-radius: 10px;
-  border: 1px solid var(--secondary);
-  box-shadow: 0 0 10px var(--secondary);
-  cursor: pointer;
-  transition: all 0.3s ease;
+.home {
+    font-family: var(--font-family);
 }
 
-.guild-card:hover {
-  scale: 1.05;
-  box-shadow: 0 0 20px var(--accent);
+/* Hero Section */
+.hero {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: var(--background-tertiary);
+    position: relative;
+    height: 40vh;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.guild-icon-wrapper {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 2.5px solid transparent;
+.hero-content {
+    position: relative;
+    text-align: center;
+    color: #fff;
+    padding: 0 1rem;
 }
 
-.bot-joined {
-  border-color: #37ff7677;
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
 }
 
-.bot-not-joined {
-  border-color: #ff000050;
+.hero-content p {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
 }
 
-.guild-icon {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
+/* Features Section */
+.features {
+    padding: 4rem 2rem;
+    background-color: var(--background-secondary);
 }
 
-.grayscale {
-  filter: grayscale(100%);
+.features h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
 }
 
-.guild-name {
-  margin-top: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  color: #fff;
-  text-align: center;
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background-color: var(--background-tertiary);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.feature-info {
+    padding: 1rem;
+}
+
+.feature-info h3 {
+    color: #fff;
+    margin-bottom: var(--margin-small);
+}
+
+.feature-info p {
+    color: var(--color-secondary);
+}
+
+/* Introduction Section */
+.introduction {
+    background-color: var(--background-tertiary);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 4rem 2rem;
+    gap: 2rem;
+}
+
+.intro-image {
+    flex: 1 1 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.intro-image img {
+    width: 80%;
+    border-radius: 8px;
+}
+
+.intro-text {
+    flex: 1 1 300px;
+}
+
+.intro-text h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.intro-text p {
+    font-size: 1.1rem;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--background-secondary);
+    text-align: center;
+    font-size: 1rem;
+    position: absolute;
+    left: 0;
+    width: 100%;
 }
 </style>
