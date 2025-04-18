@@ -63,7 +63,7 @@ const login = async () => {
                     </div>
                 </div>
                 <div class="feature-card">
-                    <img src="@/assets/images/coming_soon.jpg" alt="Auto Roles" />
+                    <img src="@/assets/images/auto_roles.jpg" alt="Auto Roles" />
                     <div class="feature-info">
                         <h3>Auto Roles</h3>
                         <p>Asign roles automatically to new members.</p>
