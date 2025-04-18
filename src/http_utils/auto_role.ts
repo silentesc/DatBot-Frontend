@@ -19,20 +19,22 @@ export async function getAutoRoles(guildId: string): Promise<Array<Role>> {
 }
 
 
-export async function postAutoRole(guildId: string, roleId: string): Promise<void> {
+export async function postAutoRole(guildId: string, roleId: string): Promise<Role | null> {
     const sessionId = Cookies.get(SESSION_ID_COOKIE);
 
     if (!sessionId) {
         throw new Error("Session ID not found");
     }
 
-    await axios.post(`${BACKEND_URL}/auto_role/auto_role`, {
+    const response = await axios.post(`${BACKEND_URL}/auto_role/auto_role`, null, {
         params: {
             session_id: sessionId,
             guild_id: guildId,
             role_id: roleId,
         },
-    })
+    });
+
+    return response.data;
 }
 
 
