@@ -11,8 +11,8 @@ export async function getLogin(): Promise<string> {
 }
 
 
-export async function getInvite(): Promise<string> {
-    const response = await axios.get(`${BACKEND_URL}/auth/invite`);
+export async function getInvite(guildId: string): Promise<string> {
+    const response = await axios.get(`${BACKEND_URL}/auth/invite`, { params: { guild_id: guildId } });
     const inviteUrl: string = response.data;
     return inviteUrl;
 }
