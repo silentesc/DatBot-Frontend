@@ -22,10 +22,10 @@ const manage = (guildId: string) => {
     router.push({ name: "DashboardView", params: { guildId: guildId, plugin: Plugins.BOT_SETTINGS } })
 }
 
-const invite = async () => {
+const invite = async (guildId: string) => {
     loading.value = true;
 
-    await getInvite()
+    await getInvite(guildId)
         .then(loginUrl => {
             window.open(loginUrl, '_blank');
         })
@@ -72,7 +72,7 @@ onMounted(async () => {
                     alt="Guild Icon">
                 <p class="guild-name">{{ guild.name }}</p>
                 <button v-if="guild.bot_joined" class="button button-primary" @click="manage(guild.id)">Manage</button>
-                <button v-else class="button button-secondary" @click="invite()">Invite</button>
+                <button v-else class="button button-secondary" @click="invite(guild.id)">Invite</button>
             </div>
         </div>
 
