@@ -80,9 +80,17 @@ export interface WelcomeMessage {
 }
 
 
+export interface LeaveMessage {
+    channel: Channel;
+    guild: Guild;
+    message: string;
+}
+
+
 export enum Plugins {
     BOT_SETTINGS = "bot-settings",
     WELCOME_MESSAGE = "welcome-message",
+    LEAVE_MESSAGE = "leave-message",
     AUTO_ROLES = "auto-roles",
     REACTION_ROLES = "reaction-roles",
 }

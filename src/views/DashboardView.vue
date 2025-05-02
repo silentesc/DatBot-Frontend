@@ -4,6 +4,7 @@ import AutoRolesComponent from '@/components/plugins/AutoRolesComponent.vue';
 import BotSettingsComponent from '@/components/plugins/BotSettingsComponent.vue';
 import ReactionRoleComponent from '@/components/plugins/ReactionRoleComponent.vue';
 import WelcomeMessageComponent from '@/components/plugins/WelcomeMessageComponent.vue';
+import LeaveMessageComponent from '@/components/plugins/LeaveMessageComponent.vue';
 import { Plugins } from '@/models';
 import { ref, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -32,6 +33,7 @@ watchEffect(() => {
         <div class="dashboard-content">
             <BotSettingsComponent v-if="plugin === Plugins.BOT_SETTINGS" :guild-id="guildId" />
             <WelcomeMessageComponent v-else-if="plugin === Plugins.WELCOME_MESSAGE" :guild-id="guildId" />
+            <LeaveMessageComponent v-else-if="plugin === Plugins.LEAVE_MESSAGE" :guild-id="guildId" />
             <AutoRolesComponent v-else-if="plugin === Plugins.AUTO_ROLES" :guild-id="guildId" />
             <ReactionRoleComponent v-else-if="plugin === Plugins.REACTION_ROLES" :guild-id="guildId" />
             <div v-else>
