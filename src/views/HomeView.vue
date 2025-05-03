@@ -63,6 +63,13 @@ const login = async () => {
                     </div>
                 </div>
                 <div class="feature-card">
+                    <img src="@/assets/images/leave_message.png" alt="Leave Messages" />
+                    <div class="feature-info">
+                        <h3>Leave Messages</h3>
+                        <p>Create custom messages when a member leaves.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
                     <img src="@/assets/images/auto_role.png" alt="Auto Roles" />
                     <div class="feature-info">
                         <h3>Auto Roles</h3>
