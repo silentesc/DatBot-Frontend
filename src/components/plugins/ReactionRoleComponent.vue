@@ -40,7 +40,7 @@ const createReactionRole = async (channelId: string, type: string, emojiRoles: A
         })
         .catch(error => {
             console.error("Creating a creation role failed with error:", error);
-            errorMsg.value = "Creating a creation role failed";
+            errorMsg.value = error.response.data.detail;
         });
 
     isReactionRoleCreationInProgress.value = false;
@@ -61,7 +61,7 @@ const deleteReactionRole = async (channelId: string, messageId: string) => {
         })
         .catch((error) => {
             console.error("Error while deleting reaction role:", error);
-            errorMsg.value = "Error while deleting reaction role";
+            errorMsg.value = error.response.data.detail;
         });
 
     loading.value = false;
@@ -85,7 +85,7 @@ onMounted(async () => {
         })
         .catch(error => {
             console.error("Error while getting reaction roles", error);
-            errorMsg.value = "Error while getting reaction roles";
+            errorMsg.value = error.response.data.detail;
         });
 
     getChannels(props.guildId)
@@ -94,7 +94,7 @@ onMounted(async () => {
         })
         .catch(error => {
             console.error("Error while getting guild channels", error);
-            errorMsg.value = "Error while getting guild channels";
+            errorMsg.value = error.response.data.detail;
         });
 
     getRoles(props.guildId)
@@ -103,7 +103,7 @@ onMounted(async () => {
         })
         .catch((error) => {
             console.error("Error while getting guild roles", error);
-            errorMsg.value = "Error while getting guild roles";
+            errorMsg.value = error.response.data.detail;
         });
 
     loading.value = false;

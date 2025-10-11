@@ -30,16 +30,16 @@ watch(newRoleId, async () => {
     }
     loading.value = true;
     await postAutoRole(props.guildId, newRoleId.value)
-        .then((role: Role | null) => {
-            if (role) {
-                autoRoles.value.push(role);
-            }
-            newRoleId.value = null;
-        })
-        .catch(error => {
-            console.error("Error while adding auto role", error);
-            errorMsg.value = "Error while adding auto role";
-        });
+    .then((role: Role | null) => {
+        if (role) {
+            autoRoles.value.push(role);
+        }
+    })
+    .catch(error => {
+        console.error("Error while adding auto role", error);
+        errorMsg.value = error.response.data.detail;
+    });
+    newRoleId.value = null;
     loading.value = false;
 });
 
@@ -51,7 +51,7 @@ const removeAutoRole = async (roleId: string) => {
         })
         .catch(error => {
             console.error("Error while deleting auto role", error);
-            errorMsg.value = "Error while deleting auto role";
+            errorMsg.value = error.response.data.detail;
         });
     loading.value = false;
 }

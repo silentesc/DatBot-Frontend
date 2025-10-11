@@ -25,7 +25,7 @@ onMounted(async () => {
         })
         .catch(error => {
             console.error("Error while discord callback:", error);
-            errorMsg.value = "Error while discord callback";
+            errorMsg.value = error.response.data.detail;
         })
 
     loading.value = false;

@@ -55,9 +55,9 @@ const saveChanges = async () => {
         .then(_ => {
             isWelcomeMessageSet.value = true;
         })
-        .catch(e => {
-            console.error(e);
-            errorMsg.value = e.message;
+        .catch(error => {
+            console.error(error);
+            errorMsg.value = error.response.data.detail;
         });
 
     loading.value = false;
@@ -78,9 +78,9 @@ const deleteWelcomeMessage = async () => {
             selectedChannelId.value = "";
             message.value = "";
         })
-        .catch(e => {
-            console.error(e);
-            errorMsg.value = e.message;
+        .catch(error => {
+            console.error(error);
+            errorMsg.value = error.response.data.detail;
         });
 
     loading.value = false;
@@ -104,7 +104,7 @@ onMounted(async () => {
         })
         .catch(error => {
             console.error("Error while getting guild channels", error);
-            errorMsg.value = "Error while getting guild channels";
+            errorMsg.value = error.response.data.detail;
         });
 
     await getWelcomeMessage(props.guildId)
@@ -117,7 +117,7 @@ onMounted(async () => {
         })
         .catch(error => {
             console.error("Error while getting guild channels", error);
-            errorMsg.value = "Error while getting guild channels";
+            errorMsg.value = error.response.data.detail;
         });
 
     loading.value = false;
