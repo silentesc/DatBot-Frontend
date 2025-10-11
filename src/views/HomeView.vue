@@ -23,7 +23,7 @@ const login = async () => {
         })
         .catch(error => {
             console.error("Error while getting login url:", error);
-            errorMsg.value = "Error while getting login url";
+            errorMsg.value = error.response.data.detail;
         });
 }
 </script>

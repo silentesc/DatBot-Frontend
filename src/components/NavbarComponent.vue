@@ -38,7 +38,7 @@ const login = async () => {
         })
         .catch(error => {
             console.error("Error while getting login url:", error);
-            errorMsg.value = "Error while getting login url";
+            errorMsg.value = error.response.data.detail;
         });
 }
 
@@ -46,7 +46,7 @@ const logout = async () => {
     await postLogout()
         .catch(error => {
             console.error("Error during logout:", error);
-            errorMsg.value = "Error during logout";
+            errorMsg.value = error.response.data.detail;
         });
 
     Cookies.remove(SESSION_ID_COOKIE);
@@ -76,7 +76,7 @@ onMounted(async () => {
         .catch(error => {
             console.error("Error while validating session:", error);
             console.log("Logging out because of failed validation...");
-            errorMsg.value = "Error while validating session";
+            errorMsg.value = error.response.data.detail;
             logout();
         });
 });
@@ -93,7 +93,7 @@ onMounted(async () => {
                 <div v-if="session">
                     <div class="user-container" @click="toggleDropdown">
                         <img class="user-avatar"
-                            :src="`https://cdn.discordapp.com/avatars/${session.user.id}/${session.user.avatar}.png`"
+                            :src="session.user.avatar ? `https://cdn.discordapp.com/avatars/${session.user.id}/${session.user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/4.png'"
                             alt="User Avatar">
                         <span class="user-username">{{ session.user.username }}</span>
 

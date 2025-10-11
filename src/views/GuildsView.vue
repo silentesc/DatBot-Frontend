@@ -31,7 +31,7 @@ const invite = async (guildId: string) => {
         })
         .catch(error => {
             console.error("Error while getting invite url:", error);
-            errorMsg.value = "Error while getting invite url";
+            errorMsg.value = error.response.data.detail;
         });
 
     loading.value = false;
@@ -56,7 +56,7 @@ onMounted(async () => {
         })
         .catch(error => {
             console.error("An error happened while getting user guilds:", error);
-            errorMsg.value = "An error happened while getting user guilds";
+            errorMsg.value = error.response.data.detail;
         });
 
     loading.value = false;

@@ -32,7 +32,7 @@ const getLogs = async () => {
         })
         .catch(error => {
             console.error("Error while getting logs", error);
-            errorMsg.value = "Error while getting logs";
+            errorMsg.value = error.response.data.detail;
         });
 
     loading.value = false;
