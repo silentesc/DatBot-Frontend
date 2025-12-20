@@ -19,4 +19,4 @@ COPY . .
 RUN npm run build
 
 EXPOSE 8002
-CMD [ "http-server", "dist", "-p", "8002" ]
+CMD [ "http-server", "dist", "-p", "8002", "--spa" ]
