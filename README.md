@@ -1,33 +1,27 @@
-# DatBot-Frontend
+# How to install
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
+### Make docker image
 ```sh
-npm install
+git clone https://github.com/silentesc/DatBot-Frontend.git
+```
+```sh
+cd DatBot-Frontend
+```
+```sh
+docker build -t datbot-frontend .
 ```
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
+### Docker Compose
+```yaml
+services:
+  datbot-frontend:
+    image: datbot-frontend
+    container_name: datbot-frontend
+    ports:
+      - "8081:8081"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    restart: unless-stopped
 ```
