@@ -7,6 +7,9 @@ git clone https://github.com/silentesc/DatBot-Frontend.git
 ```sh
 cd DatBot-Frontend
 ```
+```txt
+Don't forget to change src/settings.json for backend config
+```
 ```sh
 docker build -t datbot-frontend .
 ```
